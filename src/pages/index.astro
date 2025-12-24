@@ -1,7 +1,6 @@
 ---
 import siteConfig from '@/site.config';
-import { getAllPosts, getFeaturedPosts } from '@/utils/getPosts';
-import { processPost } from '@/utils/content';
+import { getAllPosts, getFeaturedPosts, sortPostsByDate } from '@/utils/getPosts';
 import { getHomeContent } from '@/utils/page-sections';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import LinkWrapper from '@/components/common/LinkWrapper.astro';
@@ -15,25 +14,12 @@ const sections = await getHomeContent();
 
 // Filter posts based on environment
 const allPosts = await getAllPosts();
+const sortedPosts = sortPostsByDate(allPosts);
+
+const previewPosts = sortedPosts.slice(0, siteConfig.homeOptions.recentPosts.count)
 
 // Get featured posts
 const featuredPosts = getFeaturedPosts(allPosts);
-
-// Process posts for reading time and word count
-const processedPosts = await Promise.all(
-  allPosts.map(async (post) => await processPost(post))
-) as any[];
-
-// Get featured post based on configuration
-let featuredPost = null;
-if (siteConfig.homeOptions.featuredPost.enabled) {
-  featuredPost = processedPosts[0];
-}
-
-// Get preview posts based on whether featured post is shown
-const previewPosts = featuredPost
-  ? processedPosts.slice(1, siteConfig.homeOptions.recentPosts.count + 1)
-  : processedPosts.slice(0, siteConfig.homeOptions.recentPosts.count);
 
 const seoData = generateHomeSEO(Astro.url.href);
 ---
@@ -70,7 +56,7 @@ const seoData = generateHomeSEO(Astro.url.href);
     <!-- ============================================================ -->
     <!-- FEATURED POST -->
     <!-- ============================================================ -->
-    {featuredPost && (
+    {featuredPosts && (
       <section class="animate mb-12">
         <div class="flex items-center mb-6">
           <h2 class="text-lg font-semibold">Featured Post</h2>
@@ -96,7 +82,7 @@ const seoData = generateHomeSEO(Astro.url.href);
           </LinkWrapper>
         </div>
         <div class="space-y-4">
-          <ContentDisplay entries={previewPosts} display="card" class="mb-8" />
+          <ContentDisplay entries={previewPosts} display="card" showImages class="mb-8" />
         </div>
       </section>
     )}

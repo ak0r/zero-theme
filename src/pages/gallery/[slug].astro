@@ -11,7 +11,7 @@ export const getStaticPaths = (async () => {
   const galleries = await getAllGalleries();
   
   return galleries.map((gallery) => ({
-    params: { slug: gallery.id },
+    params: { slug: gallery.data.slug || gallery.id },
     props: { gallery },
   }));
 }) satisfies GetStaticPaths;

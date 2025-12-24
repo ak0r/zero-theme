@@ -4,34 +4,17 @@ import type { Root, Image, Paragraph } from 'mdast';
 
 /**
  * Consolidated Image Processing Plugin
- * Handles: Folder images, WebP conversion, Image grids, Captions
- * This replaces remarkFolderImages, remarkImageGrids, remarkImageCaptions
+ * Handles: Image path resolution, Image grids, Captions
+ * Converts absolute Obsidian paths to relative paths for Astro's native optimization
  */
 
 // ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-function convertToWebP(imagePath: string): string {
-  if (
-    !imagePath ||
-    imagePath.startsWith('http') ||
-    imagePath.toLowerCase().endsWith('.svg') ||
-    imagePath.toLowerCase().endsWith('.webp')
-  ) {
-    return imagePath;
-  }
-
-  return imagePath.replace(/\.(jpg|jpeg|png|gif|bmp|tiff|tif)$/i, '.webp');
-}
-
-// ============================================================================
-// IMAGE PATH RESOLUTION (Folder-based & Single-file)
+// IMAGE PATH RESOLUTION
 // ============================================================================
 
 function resolveImagePaths(tree: Root, file: any) {
   visit(tree, 'image', (node: Image) => {
-    if (!node.url || node.url.startsWith('/') || node.url.startsWith('http')) {
+    if (!node.url || node.url.startsWith('http')) {
       return;
     }
 
@@ -50,6 +33,7 @@ function resolveImagePaths(tree: Root, file: any) {
     let contentSlug: string | null = null;
     let isFolderBased = false;
 
+    // Detect collection and slug from file path
     if (file.path) {
       const normalizedPath = file.path.replace(/\\/g, '/');
       const pathParts = normalizedPath.split('/');
@@ -74,6 +58,11 @@ function resolveImagePaths(tree: Root, file: any) {
         const pagesIndex = pathParts.indexOf('pages');
         isFolderBased = normalizedPath.endsWith('/index.md');
         contentSlug = isFolderBased ? pathParts[pagesIndex + 1] : null;
+      } else if (normalizedPath.includes('/gallery/')) {
+        collection = 'gallery';
+        const galleryIndex = pathParts.indexOf('gallery');
+        isFolderBased = normalizedPath.endsWith('/index.md');
+        contentSlug = isFolderBased ? pathParts[galleryIndex + 1] : null;
       } else if (normalizedPath.includes('/special/')) {
         collection = 'pages';
         const specialIndex = pathParts.indexOf('special');
@@ -83,6 +72,8 @@ function resolveImagePaths(tree: Root, file: any) {
     }
 
     let imagePath = node.url;
+
+    // Remove ./ prefix if present for processing
     if (imagePath.startsWith('./')) {
       imagePath = imagePath.slice(2);
     }
@@ -93,33 +84,40 @@ function resolveImagePaths(tree: Root, file: any) {
 
     if (!collection) return;
 
-    // Folder-based content
-    if (isFolderBased && contentSlug) {
-      let cleanImagePath = imagePath;
-      if (cleanImagePath.startsWith('images/') || cleanImagePath.startsWith('attachments/')) {
-        cleanImagePath = cleanImagePath.replace(/^(images|attachments)\//, '');
-      }
-      let finalUrl = `/${collection}/${contentSlug}/${cleanImagePath}`;
-      finalUrl = convertToWebP(finalUrl);
-      node.url = finalUrl;
-    }
-    // Single-file with attachments/ prefix
-    else if (imagePath.startsWith('attachments/')) {
-      let finalUrl = `/${collection}/${imagePath}`;
-      finalUrl = convertToWebP(finalUrl);
-      node.url = finalUrl;
-    }
-    // Other relative paths
-    else {
-      let finalUrl = `/${collection}/attachments/${imagePath}`;
-      finalUrl = convertToWebP(finalUrl);
-      node.url = finalUrl;
+    // 1. Already has relative prefix (./ or ../)
+    if (node.url.startsWith('./') || node.url.startsWith('../')) {
+      // Keep as-is, Astro will handle it
+      return;
     }
 
-    // Update hProperties if they exist
-    if (node.data && node.data.hProperties) {
-      (node.data.hProperties as any).src = node.url;
+    // 2. Relative path without ./ prefix → add ./
+
+    if (imagePath.startsWith('attachments/') || imagePath.startsWith('images/')) {
+      node.url = `./${imagePath}`;
+      return;
     }
+
+    // 3. Absolute vault paths (from Obsidian) → convert to relative
+    if (imagePath.startsWith(`${collection}/`)) {
+      // Folder-based
+      if (isFolderBased && contentSlug && imagePath.startsWith(`${collection}/${contentSlug}/`)) {
+        node.url = `./${imagePath.replace(`${collection}/${contentSlug}/`, '')}`;
+        return;
+      }
+      
+      // Single-file
+      if (imagePath.startsWith(`${collection}/attachments/`)) {
+        node.url = `./${imagePath.replace(`${collection}/`, '')}`;
+        return;
+      }
+    }
+
+    // Edge case: bare filename (if needed)
+    if (!imagePath.includes('/')) {
+      node.url = `./attachments/${imagePath}`;
+      return;
+    }
+    
   });
 }
 

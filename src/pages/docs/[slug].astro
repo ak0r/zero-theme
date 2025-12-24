@@ -7,7 +7,7 @@ export async function getStaticPaths() {
   const allDocs = await getAllDocs();
 
   return allDocs.map(doc => ({
-    params: { id: doc.id },
+    params: { slug: doc.data.slug || doc.id },
     props: { doc }
   }));
 }

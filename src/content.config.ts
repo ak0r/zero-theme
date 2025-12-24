@@ -110,6 +110,7 @@ const docsCollection = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
   schema: z.object({
     title: z.string().default('Untitled Documentation'),
+    slug: z.string().optional(),
     description: z.string().nullable().optional().default('No description provided'),
     date: z.coerce.date().default(() => new Date()),
     category: z.string().nullable().optional().default('General'),
@@ -146,6 +147,7 @@ const galleryCollection = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/gallery' }),
   schema: z.object({
     title: z.string().default('Untitled Gallery'),
+    slug: z.string().optional(),
     description: z.string().nullable().optional().default('No description provided'),
     date: z.coerce.date().default(() => new Date()),
     coverImage: z.string().nullable().optional(), // Cover image for gallery card
