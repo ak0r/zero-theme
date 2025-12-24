@@ -1,0 +1,76 @@
+---
+import type { Post, Docs } from '@/types';
+import Arrow from '@/components/common/AnimatedArrow.astro';
+
+interface Props {
+  prevEntry?: Post | Docs;
+  nextEntry?: Post | Docs;
+  seriesName?: string;
+}
+
+const { prevEntry, nextEntry, seriesName } = Astro.props;
+
+// Helper function to get the base path from collection
+const getBasePath = (entry: Post | Docs): string => {
+  return entry.collection === 'posts' ? '/posts' : '/docs';
+};
+---
+{ ( prevEntry || nextEntry) && (
+  <section class="mt-12 pt-8 border-t border-ui-primary">
+    {
+      seriesName && (
+        <div class="mb-4">
+          <p class="text-sm text-content-muted">
+            Continue in <span class="font-medium text-content-primary">{seriesName}</span>
+          </p>
+        </div>
+      )
+    }
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Previous Entry -->
+      <div class="">
+        {prevEntry ? (
+          <a
+            href={`${getBasePath(prevEntry)}/${prevEntry.id}`}
+            class="group flex gap-4 p-2 sm:p-4 rounded-lg border border-ui-primary bg-surface-primary hover:bg-surface-subtle hover:border-accent transition-all"
+          >
+            <div class="flex-shrink-0 flex content-center text-content-muted group-hover:text-accent transition-colors">
+              <Arrow direction="left" size="5" position="relative" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs text-content-muted mb-1">Previous</div>
+              <div class="font-medium text-content-primary group-hover:text-accent transition-colors truncate">
+                {prevEntry.data.title}
+              </div>
+            </div>
+          </a>
+        ) : (
+          <div class="h-full"></div>
+        )}
+      </div>
+      
+      <!-- Next Entry -->
+      <div class="">
+        {nextEntry ? (
+          <a
+            href={`${getBasePath(nextEntry)}/${nextEntry.id}`}
+            class="group flex gap-4 p-2 sm:p-4 rounded-lg border border-ui-primary bg-surface-primary hover:bg-surface-subtle hover:border-accent transition-all"
+          >
+            <div class="flex-1 min-w-0 text-right">
+              <div class="text-xs text-content-muted mb-1">Next</div>
+              <div class="font-medium text-content-primary group-hover:text-accent transition-colors truncate">
+                {nextEntry.data.title}
+              </div>
+            </div>
+            <div class="flex-shrink-0 flex content-center text-content-muted group-hover:text-accent transition-colors">
+              <Arrow direction="right" size="5" position="relative" />
+            </div>
+          </a>
+        ) : (
+          <div class="h-full"></div>
+        )}
+      </div>
+    </div>
+  </section>
+)}

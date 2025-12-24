@@ -1,0 +1,38 @@
+{
+  "name": "zero",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "node scripts/sync-attachments.js && astro dev",
+    "build": "node scripts/sync-attachments.js && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "sync-attachments": "node scripts/sync-attachments.js"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.12",
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/hast": "^3.0.4",
+    "@types/unist": "^3.0.3",
+    "astro": "^5.16.4",
+    "astro-icon": "^1.1.5",
+    "glightbox": "^3.3.1",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-slug": "^6.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-smartypants": "^3.0.2",
+    "remark-toc": "^9.0.0",
+    "tailwindcss": "^4.1.17",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@iconify-json/tabler": "^1.2.23",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@tailwindcss/typography": "^0.5.19",
+    "semantic-release": "^25.0.2"
+  }
+}

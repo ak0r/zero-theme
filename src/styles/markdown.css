@@ -1,0 +1,431 @@
+/* Markdown content styles using Tailwind 4 conventions */
+@layer components {
+  .md-content {
+    @apply text-base leading-relaxed text-content-primary;
+  }
+
+  /* Paragraphs */
+  .md-content p {
+    @apply my-4 text-content-primary;
+  }
+
+  .md-content > p:first-child {
+    @apply mt-0;
+  }
+
+  .md-content > p:last-child {
+    @apply mb-0;
+  }
+
+  /* Lead paragraph */
+  .md-content > p:first-of-type {
+    @apply text-xl leading-normal text-content-muted;
+  }
+
+  /* Headings */
+  .md-content h1, .md-content h2, .md-content h3, 
+  .md-content h4, .md-content h5, .md-content h6 {
+    @apply font-semibold leading-tight text-content-primary;
+    scroll-margin-top: 5rem;
+  }
+
+  .md-content h1 {
+    @apply text-4xl mt-0 mb-4;
+  }
+
+  .md-content h2 {
+    @apply text-3xl mt-8 mb-3;
+  }
+
+  .md-content h3 {
+    @apply text-2xl mt-6 mb-2;
+  }
+
+  .md-content h4 {
+    @apply text-xl mt-4 mb-1;
+  }
+
+  .md-content h5 {
+    @apply text-lg mt-2 mb-1;
+  }
+
+  .md-content h6 {
+    @apply text-base mt-2 mb-1 font-semibold;
+  }
+
+  /* Heading + paragraph spacing */
+  .md-content h2 + p,
+  .md-content h3 + p,
+  .md-content h4 + p {
+    @apply mt-8;
+  }
+
+  /* Links */
+  .md-content a:not(h1 *, h2 *, h3 *, h4 *, h5 *, h6 *) {
+    @apply no-underline decoration-dashed text-content-primary transition-colors duration-200;
+}
+
+  .md-content a:not(h1 *, h2 *, h3 *, h4 *, h5 *, h6 *):hover {
+    @apply text-accent;
+  }
+
+  .md-content a:not(.plain):not(.tag):not(.internal-link):not(.wikilink):not(.glightbox):not([href^="#"]):not([href^="/"]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='gray' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 33%;
+    background-size: 0.75em;
+    padding-right: 0.9em;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: currentColor;
+  }
+
+  .md-content a code {
+    color: inherit;
+  }
+
+  /* Text styles */
+  .md-content strong {
+    @apply font-semibold text-content-primary;
+  }
+
+  .md-content em {
+    @apply italic text-content-primary;
+  }
+
+  .md-content strong em,
+  .md-content em strong {
+    @apply font-semibold italic;
+  }
+
+  /* Lists */
+  .md-content ul,
+  .md-content ol {
+    @apply my-2 pl-3;
+  }
+
+  .md-content ul {
+    @apply list-disc ml-4 my-0.5;
+    ::marker {
+		  @apply text-content-subtle ;
+    }
+  }
+
+  .md-content ol {
+    @apply list-decimal ml-4 my-0.5;
+    ::marker {
+		  @apply text-content-subtle ;
+    }
+  }
+
+  .md-content li {
+    @apply my-1 pl-1.5 text-content-primary;
+  }
+
+  .md-content li::marker {
+    color: theme(--color-content-muted);
+  }
+
+  /* Nested lists */
+  .md-content ul ul,
+  .md-content ul ol,
+  .md-content ol ul,
+  .md-content ol ol {
+    @apply my-3;
+  }
+
+  .md-content ul ul {
+    @apply list-[circle];
+  }
+
+  .md-content ul ul ul {
+    @apply list-[square];
+  }
+
+  /* List with paragraphs */
+  .md-content li > p {
+    @apply my-3;
+  }
+
+  .md-content li > p:first-child {
+    @apply mt-5;
+  }
+
+  .md-content li > p:last-child {
+    @apply mb-5;
+  }
+
+  /* Task lists */
+  /* Remove markers from task list items */
+  .md-content ul:has(input[type="checkbox"]) {
+    @apply list-none;
+  }
+
+  .md-content ul li:has(input[type="checkbox"]) {
+    @apply list-none;
+  }
+
+  .md-content > ul.contains-task-list {
+    padding-left: 0 !important;
+  }
+
+  /* Style the checkboxes */
+  .md-content ul li input[type="checkbox"] {
+    @apply mr-2 cursor-pointer;
+  }
+
+
+  /* Blockquotes */
+  .md-content blockquote {
+    @apply my-6 pl-4 italic text-content-muted rounded-lg;
+    border-left: 4px solid theme(--color-accent);
+  }
+
+  .md-content blockquote p {
+    @apply mt-0 mb-4;
+  }
+
+  .md-content blockquote p:last-child {
+    @apply mb-0;
+  }
+
+  .md-content blockquote cite {
+    @apply not-italic text-sm text-content-muted;
+  }
+
+  /* Code */
+  .md-content code {
+    @apply px-1.5 py-1 rounded-sm text-sm font-mono font-normal text-content-primary bg-surface-raised;
+  }
+
+  .md-content a code {
+    @apply text-accent;
+  }
+
+  .md-content h2 code,
+  .md-content h3 code,
+  .md-content h4 code {
+    @apply text-[0.9em];
+  }
+
+  /* Code blocks */
+  .md-content pre {
+    @apply my-6 p-5 rounded-md overflow-x-auto text-sm bg-surface-raised;
+    line-height: 1.7143;
+  }
+
+  .md-content pre code {
+    @apply bg-transparent p-0 rounded-none font-normal;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Horizontal rule */
+  .md-content hr {
+    @apply my-6 border-0;
+    border-top: 1px solid theme(--color-ui-primary);
+  }
+
+  /* Tables */
+  .md-content table {
+    @apply w-full my-8 text-sm rounded-lg overflow-hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    line-height: 1.7143;
+    border: 1px solid theme(--color-ui-primary);
+  }
+
+  .md-content thead {
+    background-color: theme(--color-surface-raised);
+    border-bottom: 2px solid theme(--color-ui-primary);
+  }
+
+  .md-content thead th {
+    @apply font-semibold align-bottom pb-3 pt-3 px-3 text-content-primary;
+    border-right: 1px solid theme(--color-ui-primary);
+  }
+
+  .md-content thead th:first-child {
+    @apply pl-4;
+  }
+
+  .md-content thead th:last-child {
+    @apply pr-4 border-r-0;
+  }
+
+  .md-content tbody tr {
+    border-bottom: 1px solid theme(--color-ui-primary);
+  }
+
+  .md-content tbody tr:last-child {
+    @apply border-b-0;
+  }
+
+  .md-content tbody tr:hover {
+    background-color: theme(--color-surface-subtle);
+  }
+
+  .md-content tbody td {
+    @apply align-baseline py-3 px-3 text-content-primary;
+    border-right: 1px solid theme(--color-ui-primary);
+  }
+
+  .md-content tbody td:first-child {
+    @apply pl-4;
+  }
+
+  .md-content tbody td:last-child {
+    @apply pr-4 border-r-0;
+  }
+
+  /* Images */
+  .md-content img {
+    @apply my-4 rounded-md;
+  }
+
+  /* Figure */
+  .md-content figure {
+    @apply my-8;
+  }
+
+  .featured-post figure {
+    @apply my-0;
+  }
+
+  .md-content figure > * {
+    @apply my-0;
+  }
+
+  .md-content figcaption {
+    @apply text-sm mt-3 text-center text-content-muted;
+    line-height: 1.4286;
+  }
+
+  /* Video */
+  .md-content video {
+    @apply my-8 rounded-md;
+  }
+
+  /* Inline elements */
+  .md-content small {
+    @apply text-sm;
+    color: theme(--color-content-muted);
+  }
+
+  .md-content mark {
+    @apply px-1 py-0.5 rounded-sm;
+    background-color: theme(--color-accent-low);
+    color: theme(--color-content-primary);
+  }
+
+  .md-content kbd {
+    @apply font-mono text-sm px-1.5 py-0.5 rounded-sm border shadow-sm;
+    background-color: theme(--color-surface-raised);
+    border-color: theme(--color-ui-primary);
+  }
+
+  .md-content abbr[title] {
+    @apply underline decoration-dotted cursor-help;
+    text-decoration-color: theme(--color-content-muted);
+  }
+
+  .md-content sub,
+  .md-content sup {
+    @apply text-xs;
+    line-height: 0;
+  }
+
+  /* Definition list */
+  .md-content dl {
+    @apply my-5;
+  }
+
+  .md-content dt {
+    @apply font-semibold mt-5;
+    color: theme(--color-content-primary);
+  }
+
+  .md-content dd {
+    @apply mt-2 ml-7;
+    color: theme(--color-content-muted);
+  }
+
+  /* Details/Summary */
+  .md-content details {
+    @apply my-5 p-4 rounded-md border;
+    background-color: theme(--color-surface-raised);
+    border-color: theme(--color-ui-primary);
+  }
+
+  .md-content summary {
+    @apply font-semibold cursor-pointer select-none;
+    color: theme(--color-content-primary);
+  }
+
+  .md-content details[open] summary {
+    @apply mb-3;
+  }
+
+  /* Footnotes */
+  .md-content .footnotes {
+    @apply mt-12 pt-6 text-sm;
+    border-top: 1px solid theme(--color-ui-primary);
+  }
+
+  .md-content .footnotes ol {
+    @apply mt-4;
+  }
+
+  .md-content .footnote-ref {
+    @apply font-semibold no-underline;
+  }
+
+  /* Prevent orphan headings */
+  .md-content h2,
+  .md-content h3,
+  .md-content h4 {
+    break-after: avoid;
+  }
+
+  /* Reset adjacent element spacing */
+  .md-content > * + * {
+    @apply mt-0;
+  }
+
+  /* ================================
+   Image Masonry Grid
+   ================================ */
+
+   .md-content .image-container {
+    @apply my-8;
+   }
+  /* Image grid containers - override default image margins */
+  .md-content .image-grid-masonry,
+  .md-content .image-grid-single {
+    @apply my-8; /* Container gets the standard vertical margin */
+  }
+
+  .md-content .image-grid-masonry .image-item {
+    @apply block w-full;
+  }
+
+  .md-content .image-grid-single {
+    @apply block;
+  }
+
+  .md-content .image-grid-single .image-item {
+    @apply w-full mb-2;
+  }
+
+  /* Remove default image margins inside image grids */
+  .md-content .image-grid-masonry img,
+  .md-content .image-grid-single img {
+    @apply my-0; /* Override the default .md-content img margin */
+  }
+
+  /* Captions */
+  .md-content .image-caption-container p,
+  .md-content .image-caption-container em {
+    @apply text-content-muted text-sm mt-2;
+  }
+}

@@ -1,0 +1,42 @@
+---
+import TableOfContentsHeading from "./TableOfContentsHeading.astro";
+// https://kld.dev/building-table-of-contents/
+
+const { headings } = Astro.props;
+const toc = buildToc(headings);
+
+function buildToc(headings: any) {
+  const toc: any[] = [];
+  const parentHeadings = new Map();
+  
+  if (!headings)
+    return toc;
+  
+  headings.forEach((h: any) => {
+    const heading = { ...h, subheadings: [] };
+    parentHeadings.set(heading.depth, heading);
+    // Change 2 to 1 if your markdown includes your <h1>
+    if (heading.depth === 2) {
+      toc.push(heading);
+    } else {
+      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+    }
+  });
+  return toc;
+}
+
+---
+
+<details
+  class="animate group rounded-lg border border-ui-primary"
+>
+  <summary
+    class="cursor-pointer rounded-t-lg px-3 py-1.5 font-medium group-open:bg-surface-raised hover:bg-surface-subtle"
+    >Table of Contents</summary
+  >
+  <nav class="toc">
+    <ul class="py-4">
+      {toc.map((heading) => <TableOfContentsHeading heading={heading} />)}
+    </ul>
+  </nav>
+</details>

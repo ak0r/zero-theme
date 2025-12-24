@@ -1,0 +1,69 @@
+---
+import { getAllGalleries, sortGalleriesByDate, getUniqueTags, getTagCounts } from '@/utils/getGallery';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/ContainerWrapper.astro';
+import SEO from '@/components/common/SEO.astro';
+import GalleryGrid from '@/components/gallery/GalleryGrid.astro';
+import GalleryFilter from '@/components/gallery/GalleryFilter.astro';
+
+// Load all galleries
+const allGalleries = await getAllGalleries();
+
+// Sort by date (newest first)
+const sortedGalleries = sortGalleriesByDate(allGalleries);
+
+// Get all unique tags
+const allTags = getUniqueTags(sortedGalleries);
+
+// Get tag counts for display
+const tagCounts = getTagCounts(sortedGalleries);
+
+// SEO data
+const seoData = {
+  title: 'Gallery',
+  description: 'Photo galleries and image collections.',
+  canonical: Astro.url.href,
+};
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="head" />
+  
+  <Container class="py-8">
+    
+    <!-- Header -->
+    <div class="animate mb-12">
+      <h1 class="text-4xl font-bold text-content-primary mb-4">
+        Gallery
+      </h1>
+      <p class="text-lg text-content-muted max-w-2xl">
+        A collection of photo galleries showcasing moments, places, and memories.
+      </p>
+    </div>
+    
+    <!-- Tag Filter -->
+    {allTags.length > 0 && (
+      <div class="animate mb-8">
+        <GalleryFilter tags={allTags} tagCounts={tagCounts} />
+      </div>
+    )}
+    
+    <!-- Galleries Grid -->
+    <div class="animate">
+      <GalleryGrid galleries={sortedGalleries} />
+    </div>
+    
+    <!-- Empty State -->
+    {sortedGalleries.length === 0 && (
+      <div class="animate text-center py-24">
+        <p class="text-xl text-content-muted mb-4">
+          No galleries yet.
+        </p>
+        <p class="text-content-subtle">
+          Check back soon for new photo collections!
+        </p>
+      </div>
+    )}
+    
+  </Container>
+</BaseLayout>

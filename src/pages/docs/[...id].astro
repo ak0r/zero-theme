@@ -1,0 +1,22 @@
+---
+import type { Docs } from '@/types';
+import { getAllDocs } from '@/utils/getDocs';
+import DocLayout from '@/layouts/DocLayout.astro';
+
+export async function getStaticPaths() {
+  const allDocs = await getAllDocs();
+
+  return allDocs.map(doc => ({
+    params: { id: doc.id },
+    props: { doc }
+  }));
+}
+
+export interface Props {
+  doc: Docs;
+}
+
+const { doc } = Astro.props;
+
+---
+<DocLayout documentation={doc} />

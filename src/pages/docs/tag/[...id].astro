@@ -1,0 +1,78 @@
+---
+import { getAllDocs, sortDocsByDate, getDocsByTag, getUniqueTagsFromDocs } from '@/utils/getDocs';
+import { slugify } from "@/utils/commonFunctions";
+import { generateIndexSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+import TagsList from '@/components/widgets/TagsList.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getDocTagBreadcrumbs } from '@/utils/breadcrumbs';
+
+export async function getStaticPaths() {
+  const allDocs = await getAllDocs();
+  const allTags = getUniqueTagsFromDocs(allDocs);
+
+  return allTags.map((tag) => {
+    const filteredDocs = getDocsByTag(allDocs, tag);
+    const sortedDocs = sortDocsByDate(filteredDocs);
+    
+    return {
+      params: { id: slugify(tag) },
+      props: { docs: sortedDocs, tag, allTags },
+    };
+  });
+}
+
+const { docs, tag, allTags } = Astro.props;
+
+// Generate SEO
+const seoData = generateIndexSEO('docs', Astro.url.href, { tag });
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getDocTagBreadcrumbs(tag);
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <!-- <BackToPrevious href="/docs">Back to Notes</BackToPrevious> -->
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <!-- Page Title -->
+    <div class="animate mb-8">
+      <h1 class="text-3xl font-bold text-content-primary mb-2">
+        Notes tagged "{tag}"
+      </h1>
+      <p class="text-content-muted">
+        {docs.length} {docs.length === 1 ? 'note' : 'notes'}
+      </p>
+    </div>
+
+    <!-- Tags Filter -->
+    {allTags.length > 1 && (
+      <TagsList 
+        tags={allTags}
+        collection="docs"
+        currentTag={tag}
+      />
+    )}
+
+    <!-- Notes List -->
+    {docs.length > 0 ? (
+      <ContentDisplay entries={docs} display='card' />
+    ) : (
+      <div class="text-center py-12 animate">
+        <p class="text-content-muted">No notes found with this tag.</p>
+        <a href="/docs" class="inline-block mt-4 text-accent hover:underline">
+          View all notes
+        </a>
+      </div>
+    )}
+  </ContainerWrapper>
+</BaseLayout>

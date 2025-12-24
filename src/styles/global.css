@@ -1,0 +1,492 @@
+@import "tailwindcss";
+/* @plugin "@tailwindcss/typography"; */
+
+@import "./custom-themes.css";
+@import "./markdown.css";
+@import "./obsidian.css";
+@import "./glightbox-custom.css";
+
+@theme{
+
+  --color-inherit: inherit;
+  --color-current: currentColor;
+  --color-transparent: transparent;
+  --font-primary: var(--font-primary);
+  --font-secondary: var(--font-secondary);
+  --font-headings: var(--font-headings);
+  --font-code: var(--font-code); 
+}
+
+@theme inline{
+  /* surfaces */
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-subtle:  var(--surface-subtle);
+
+  /* content */
+  --color-content-primary: var(--content-primary);
+  --color-content-subtle:  var(--content-subtle);
+  --color-content-muted:   var(--content-muted);
+
+  /* ui neutrals */
+  --color-ui-primary: var(--ui-primary);
+  --color-ui-raised:  var(--ui-raised);
+  --color-ui-active:  var(--ui-active);
+
+  /* brand accent */
+  --color-accent:      var(--accent);
+  --color-accent-low:  var(--accent-low);
+  --color-accent-high: var(--accent-high);
+
+  /* statuses */
+  --color-info:        var(--info);
+  --color-info-low:    var(--info-low);
+  --color-info-high:   var(--info-high);
+
+  --color-error:       var(--error);
+  --color-error-low:   var(--error-low);
+  --color-error-high:  var(--error-high);
+
+  --color-warning:     var(--warning);
+  --color-warning-low: var(--warning-low);
+  --color-warning-high:var(--warning-high);
+
+  --color-success:     var(--success);
+  --color-success-low: var(--success-low);
+  --color-success-high:var(--success-high);
+
+  --color-tip:         var(--tip);
+  --color-tip-low:     var(--tip-low);
+  --color-tip-high:    var(--tip-high);
+}
+
+@layer base {
+
+  /* Base Styles */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+  }
+
+  body {
+    @apply m-0 font-primary bg-surface-primary text-content-primary leading-relaxed antialiased text-base ;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  header {
+    @apply fixed top-0 z-50 w-full bg-surface-primary/75 saturate-100 backdrop-blur-sm;
+    @apply transition-shadow duration-200;
+  }
+
+  main {
+    @apply flex-1 pt-24 pb-12;
+  }
+
+  :is(article, section, main) {
+    @apply leading-7;
+  }
+
+  footer {
+    @apply pb-12 text-sm;
+  }
+
+  footer, nav {
+   transform: translateZ(0);
+  }
+
+  /* Headings spacing and typography */
+  :is(h1, h2, h3, h4, h5, h6) {
+    @apply font-medium font-headings leading-10 tracking-[-0.01em];
+  }
+
+  /* :is(article, section, main) :not(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    @apply mt-12 mb-6 scroll-m-16;
+  } */
+
+  :is(h1, h2, h3, h4, h5) > a {
+    text-decoration: none;
+  }
+
+  /* h1 {
+    @apply text-4xl mt-2 mb-3;
+  }
+  h2 {
+    @apply text-3xl mt-2 mb-3;
+  }
+  h3 {
+    @apply text-2xl mt-2 mb-3;
+  }
+  h4 {
+    @apply text-xl mt-1.5 mb-2;
+  }
+  h5 {
+    @apply text-lg mt-1.5 mb-1.5;
+  }
+  h6 {
+    @apply text-base uppercase mt-1 mb-1;
+  } */
+
+  p {
+    @apply m-0 text-content-primary;
+  }
+
+  /* Links */
+  a {
+    @apply text-accent no-underline transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-accent-high opacity-80;
+  }
+
+  /* Lists */
+  li + li,
+  dt + dt,
+  dt + dd,
+  dd + dd {
+    @apply mt-0.5;
+  }
+
+  /* Definition list */
+  dt {
+    @apply font-semibold text-content-primary;
+  }
+
+  dd {
+    @apply ps-4 text-content-muted;
+  }
+
+  /* Media */
+  img, picture, video, canvas, svg {
+    @apply block max-w-full h-auto;
+  }
+
+  /* Forms */
+  button, input, textarea, select {
+    @apply font-secondary;
+    color: inherit;
+  }
+
+  button {
+    @apply cursor-pointer bg-transparent border-0 p-0;
+  }
+
+  input, textarea, select {
+    @apply px-3 py-2 rounded-md border bg-surface-primary border-ui-primary text-content-primary;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply outline-none border border-accent;
+    box-shadow: 0 0 0 3px theme(--color-accent-low);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: theme(--color-content-muted);
+  }
+
+  /* Code */
+  code, kbd, samp, pre {
+    @apply font-mono text-sm;
+  }
+
+  code {
+    @apply px-1 py-0.5 rounded-sm bg-surface-raised text-content-primary;
+  }
+
+  pre {
+    @apply bg-surface-raised p-4 rounded-md overflow-x-auto leading-normal;
+  }
+
+  pre code {
+    @apply p-1 bg-transparent;
+  }
+
+  /* Tables */
+  table {
+    @apply w-full border-collapse;
+    border-spacing: 0;
+  }
+
+  th, td {
+    @apply text-left p-3;
+    border-bottom: 1px solid theme(--color-ui-primary);
+  }
+
+  th {
+    @apply font-semibold bg-surface-raised text-content-primary ;
+  }
+
+  /* Horizontal rule */
+  hr {
+    @apply h-0 border-0 my-8;
+    border-top: 1px solid theme(--color-ui-primary);
+  }
+
+  /* Blockquote */
+  blockquote {
+    @apply my-4 pl-4 font-medium italic text-content-muted;
+    border-left: 4px solid theme(--color-accent);
+  }
+
+  /* Text styles */
+  strong {
+    @apply font-semibold text-content-primary;
+  }
+
+  em {
+    @apply italic text-content-primary;
+  }
+
+  mark {
+    @apply px-1 py-0.5 rounded-sm bg-accent-low text-content-primary;
+  }
+
+  small {
+    @apply text-sm text-content-muted;
+  }
+
+  abbr[title] {
+    @apply underline decoration-dotted cursor-help;
+  }
+
+  /* Figure */
+  figure {
+    @apply m-0;
+  }
+
+  figcaption {
+    @apply text-sm mt-2 text-content-muted;
+  }
+
+  address {
+    @apply not-italic;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: theme(--color-accent-low);
+    color: theme(--color-content-primary);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2.5 h-2.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: theme(--color-surface-raised);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md;
+    background: theme(--color-surface-raised);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme(--color-ui-primary);
+  }
+
+  /* li {
+    @apply pl-1;
+    overflow-wrap: anywhere;
+  }
+  ul {
+    @apply list-disc my-1 space-y-0.5;
+    ::marker {
+		  @apply text-content-subtle ;
+    }
+  }
+  ol {
+    @apply list-decimal my-1 ml-6 pl-2 space-y-1;
+    ::marker {
+      @apply text-content-subtle;
+    }
+  } */
+
+}
+
+@layer components {
+  .animate {
+    @apply -translate-y-3 opacity-0;
+    @apply transition-all duration-100 ease-out;
+  }
+
+  .animate.show {
+    @apply translate-y-0 opacity-100;
+  }
+  
+  .post-card, .featured-post {
+    @apply bg-surface-primary rounded-lg border border-ui-primary hover:bg-surface-raised hover:shadow-sm transition-shadow duration-200;
+  }
+
+  /* Wikilinks - base styles */
+  .wikilink {
+    @apply font-medium no-underline border-b border-dashed transition-all duration-200;
+  }
+
+  .wikilink:hover {
+    color: theme(--color-accent);
+    @apply opacity-80;
+  }
+
+  /* Wikilinks inside markdown content */
+  .md-content a.wikilink {
+    @apply font-medium no-underline border-b border-dashed;
+  }
+
+  .md-content a.wikilink:hover {
+    color: theme(--color-accent);
+    @apply opacity-80;
+  }
+
+  /* Exclude wikilinks in headings - no border or underline */
+  .md-content :is(h1, h2, h3, h4, h5, h6) a.wikilink,
+  .md-content :is(h1, h2, h3, h4, h5, h6) a.anchor-link {
+    @apply border-none no-underline opacity-100;
+    color: inherit;
+  }
+
+  .md-content :is(h1, h2, h3, h4, h5, h6) a.wikilink:hover {
+    color: theme(--color-accent);
+  }
+
+  /* Broken wikilinks */
+  .wikilink-broken {
+    @apply cursor-not-allowed line-through opacity-60;
+    color: theme(--color-content-muted);
+  }
+
+  .wikilink-broken:hover {
+    @apply opacity-60;
+  }
+
+  /* Callout Styles */
+  .callout {
+    @apply p-4 my-6 rounded-lg border-l-4;
+  }
+
+  .callout-title {
+    @apply flex items-center gap-2 font-semibold mb-2;
+  }
+
+  .callout-icon {
+    @apply w-4 h-4 shrink-0;
+  }
+
+  .callout-content {
+    @apply text-sm;
+  }
+
+  .callout-content > *:first-child { @apply mt-0; }
+  .callout-content > *:last-child { @apply mb-0; }
+
+  .callout-note {
+    @apply bg-info-low/30 border-info;
+  }
+  .callout-note .callout-title { @apply text-info-high font-semibold; }
+  .callout-note .callout-content { @apply text-info-high; }
+
+  .callout-tip {
+    @apply bg-success-low/30 border-success;
+  }
+  .callout-tip .callout-title { @apply text-success-high font-semibold; }
+  .callout-tip .callout-content { @apply text-success-high; }
+
+  .callout-important {
+    @apply bg-tip/30 border-tip;
+  }
+  .callout-important .callout-title { @apply text-tip-high font-semibold; }
+  .callout-important .callout-content { @apply text-tip-high; }
+
+  .callout-warning {
+    @apply bg-warning-low/30 border-warning;
+  }
+  .callout-warning .callout-title { @apply text-warning-high font-semibold; }
+  .callout-warning .callout-content { @apply text-warning-high; }
+
+  .callout-caution {
+    @apply bg-error-low/30 border-error;
+  } 
+  .callout-caution .callout-title { @apply text-error-high font-semibold; }
+  .callout-caution .callout-content { @apply text-error-high; }
+
+  /* Collapsible Callout Styles */
+  .callout-collapsible .callout-title {
+    @apply cursor-pointer select-none;
+  }
+
+  .callout-toggle {
+    @apply ml-auto p-1 rounded transition-colors duration-200;
+    @apply focus:outline-none focus:ring-0;
+  }
+
+  .callout-toggle-icon {
+    @apply transition-transform duration-200;
+  }
+
+  .callout-collapsed .callout-toggle-icon {
+    @apply rotate-90;
+  }
+
+  .callout-content {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .callout-collapsed .callout-content {
+    @apply overflow-hidden;
+  }
+
+  .toc {
+    @apply space-y-2;
+  }
+
+  .toc ul {
+    @apply  ml-0 pl-2 space-y-1;
+  }
+
+  .toc li {
+    @apply list-disc list-inside ml-2 pl-2;
+  }
+
+  .toc a {
+    @apply block py-1 text-sm text-content-muted no-underline transition-colors duration-200;
+  }
+
+  .toc a:hover {
+    color: theme(--color-accent);
+  }
+
+  .toc a.active {
+    @apply font-medium;
+    color: theme(--color-accent);
+  }
+
+  /* Nested levels */
+  .toc ul ul {
+    @apply mt-1 pl-1 space-y-0.5;
+  }
+
+  .toc ul ul a {
+    @apply text-sm text-content-muted;
+  }
+
+  .featured-post a,
+    .post-card a {
+      @apply leading-none; /* Remove line-height spacing */
+    }
+
+    .featured-post .md-content figure,
+    .featured-post .md-content img,
+    .post-card .md-content figure,
+    .post-card .md-content img {
+      @apply my-0 leading-none block;
+    }
+
+}

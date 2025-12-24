@@ -1,0 +1,168 @@
+---
+import { render } from 'astro:content';
+import type { Docs } from '@/types';
+import { siteConfig } from '@/site.config';
+import { resolveImage } from '@/utils/images';
+import { isValidDate } from '@/utils/content';
+import { generateDocSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import LinkedMentions from '@/components/widgets/LinkedMentions.astro';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import TableOfContents from '@/components/widgets/TableOfContents.astro';
+import SeriesWidget from '@/components/docs/SeriesWidget.astro';
+import ContentNavigation from '@/components/widgets/ContentNavigation.astro';
+import RelatedNotes from '@/components/docs/RelatedNotes.astro';
+import { getAllDocs, getSeriesDocs, getAdjacentDocsInSeries, getRelatedDocs } from '@/utils/getDocs';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getDocBreadcrumbs } from '@/utils/breadcrumbs';
+
+export interface Props {
+  documentation: Docs;
+}
+
+const { documentation } = Astro.props;
+const { title, description, lastModified, version, image, imageAlt, hideTOC, hideCoverImage, series, tags } = documentation.data;
+
+// Generate SEO data
+const seoData = generateDocSEO(documentation, Astro.url.href);
+
+// Get all docs
+const allDocs = await getAllDocs();
+
+// Process the doc content
+const { Content, headings } = await render(documentation);
+
+// Process image path
+let postImage = image;
+if (Array.isArray(postImage)) {
+  postImage = postImage[0];
+}
+
+const coverImage = resolveImage(postImage);
+const coverImageAlt = imageAlt || `Featured image for: ${title}`;
+
+// Table of contents
+const showTOC = hideTOC !== true && siteConfig.tableOfContents.enabled;
+const shouldShowTOC = !hideTOC && showTOC && headings.length > 0;
+
+// Don't show cover image in content if hideCoverImage is set
+const shouldShowCoverImage = coverImage && !hideCoverImage;
+
+// Series logic
+const isPartOfSeries = !!series;
+let seriesDocs: Docs[] = [];
+let seriesNav: { prev: Docs | null; next: Docs | null } = { prev: null, next: null };
+
+if (isPartOfSeries) {
+  seriesDocs = getSeriesDocs(allDocs, series);
+  seriesNav = getAdjacentDocsInSeries(allDocs, documentation);
+}
+
+// Related notes (only show if NOT part of series)
+const relatedDocs = !isPartOfSeries ? getRelatedDocs(allDocs, documentation, 3) : [];
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getDocBreadcrumbs(documentation.id, documentation.data.title);
+---
+
+<BaseLayout>
+  <!-- SEO -->
+  <SEO data={seoData} slot="seo" />
+
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <div class="animate">
+      <!-- <BackToPrevious href="/docs">Back to Notes</BackToPrevious> -->
+       <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <div class="relative animate">
+      <!-- Documentation header -->
+      <section class="my-8 sm:my-10 space-y-2">
+        <div class="flex items-center gap-2 text-sm font-medium text-content-muted">
+          {lastModified && isValidDate(lastModified) && (
+            <time datetime={lastModified.toISOString()} class="text-xs text-primary-500 dark:text-primary-400">
+              Updated {lastModified.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </time>
+          )}
+          {version && (
+            <>
+              <span class="text-content-muted">&bull;</span>
+              <span>v{version}</span>
+            </>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-2xl font-bold text-content-primary my-4 leading-tight">
+          {title}
+        </h1>
+
+        <!-- Tags -->
+        {tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {tags.map(tag => (
+              <a
+                href={`/docs/tag/${encodeURIComponent(tag.toLowerCase().replace(/\s+/g, '-'))}`}
+                class="inline-block px-2 py-1 text-xs transition-colors duration-300 ease-in-out text-content-subtle rounded-full border border-ui-raised hover:bg-surface-subtle"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <!-- Series Widget (Collapsible, all screen sizes) -->
+      {isPartOfSeries && seriesDocs.length > 0 && (
+        <SeriesWidget 
+          seriesName={series} 
+          seriesDocs={seriesDocs} 
+          currentDocId={documentation.id}
+        />
+      )}
+
+      <!-- Cover Image -->
+      {shouldShowCoverImage && (
+        <div class="mb-10">
+          <ImageWrapper
+            src={coverImage}
+            alt={coverImageAlt}
+            class="w-full mb-4 rounded-lg border border-ui-primary shadow-lg"
+            fit="contain"
+          />
+        </div>
+      )}
+
+      <!-- Table of Contents -->
+      {shouldShowTOC && (
+        <div id="toc" class="mb-10">
+          <TableOfContents headings={headings} />
+        </div>
+      )}
+    </div>
+
+    <article class="animate md-content flex flex-col gap-y-10">
+      <!-- Article content -->
+      <div class="prose max-w-none" id="doc-content">
+        <Content />
+      </div>
+
+      {siteConfig.postOptions.linkedMentions.enabled && (
+        <LinkedMentions currentSlug={documentation.id} />
+      )}
+
+      <!-- Navigation: Series or Related -->
+      {isPartOfSeries && (seriesNav.prev || seriesNav.next) ? (
+        <ContentNavigation 
+          prevEntry={seriesNav.prev} 
+          nextEntry={seriesNav.next}
+        />
+      ) : (
+        <RelatedNotes relatedDocs={relatedDocs} />
+      )}
+    </article>
+  </ContainerWrapper>
+</BaseLayout>

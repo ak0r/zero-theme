@@ -1,0 +1,126 @@
+---
+import { siteConfig } from '@/site.config';
+import { getAllPosts, sortPostsByDate, getUniqueTags } from '@/utils/getPosts';
+import { generateIndexSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import TagsList from '@/components/widgets/TagsList.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getBreadcrumbsFromPath } from '@/utils/breadcrumbs';
+
+export async function getStaticPaths() {
+  const allPosts = await getAllPosts();
+  const sortedPosts = sortPostsByDate(allPosts);
+  
+  const postsPerPage = siteConfig.postOptions.postsPerPage;
+  const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+  
+  // Generate paths for page 2 onwards (page 1 is handled by index.astro)
+  const paths = [];
+  for (let i = 2; i <= totalPages; i++) {
+    const startIndex = (i - 1) * postsPerPage;
+    const endIndex = startIndex + postsPerPage;
+    const pagePosts = sortedPosts.slice(startIndex, endIndex);
+    
+    paths.push({
+      params: { page: String(i) },
+      props: {
+        posts: pagePosts,
+        currentPage: i,
+        totalPages,
+        totalPosts: sortedPosts.length,
+        allTags: getUniqueTags(sortedPosts)
+      }
+    });
+  }
+  
+  return paths;
+}
+
+const { posts, currentPage, totalPages, totalPosts, allTags } = Astro.props;
+
+// Group posts by year if enabled
+const groupPostsByYear = siteConfig.postOptions.groupPostsByYear;
+
+// Pagination info
+const pagination = {
+  currentPage,
+  totalPages,
+  hasNext: currentPage < totalPages,
+  hasPrev: currentPage > 1,
+  nextUrl: currentPage < totalPages ? `/posts/${currentPage + 1}` : undefined,
+  prevUrl: currentPage === 2 ? '/posts' : `/posts/${currentPage - 1}`
+};
+
+// Generate SEO
+const seoData = generateIndexSEO('posts', Astro.url.href, { page: currentPage });
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <!-- <BackToPrevious href="/">Back to Home</BackToPrevious> -->
+
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <!-- Page Title -->
+    <div class="animate mb-8">
+      <h1 class="text-3xl font-bold text-content-primary mb-2">Archive</h1>
+      <p class="text-content-muted">
+         Posts - Page {currentPage}
+      </p>
+    </div>
+
+    <!-- Tags List -->
+    <TagsList tags={allTags} showAllTags={false} />
+
+    <ContentDisplay entries={posts} display="card" showTags={false} class="mb-8" groupByYear={groupPostsByYear} />
+
+    <!-- Pagination Controls -->
+    <div class="flex justify-between items-center mt-8 pt-8 border-t border-ui-primary">
+      <div>
+        {pagination.hasPrev && pagination.prevUrl ? (
+          <a 
+            href={pagination.prevUrl}
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-content-primary bg-surface-subtle rounded-lg hover:bg-surface-raised transition-colors"
+          >
+            ← Previous
+          </a>
+        ) : (
+          <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-content-muted opacity-50">
+            ← Previous
+          </span>
+        )}
+      </div>
+
+      <div class="text-sm text-content-muted">
+        Page {currentPage} of {totalPages}
+      </div>
+
+      <div>
+        {pagination.hasNext && pagination.nextUrl ? (
+          <a 
+            href={pagination.nextUrl}
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-content-primary bg-surface-subtle rounded-lg hover:bg-surface-raised transition-colors"
+          >
+            Next →
+          </a>
+        ) : (
+          <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-content-muted opacity-50">
+            Next →
+          </span>
+        )}
+      </div>
+    </div>
+  </ContainerWrapper>
+</BaseLayout>

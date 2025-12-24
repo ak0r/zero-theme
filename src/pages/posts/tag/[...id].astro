@@ -1,0 +1,74 @@
+---
+import { siteConfig } from '@/site.config';
+import { getAllPosts, sortPostsByDate, getUniqueTags } from '@/utils/getPosts';
+import { slugify } from "@/utils/commonFunctions";
+import { generateIndexSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import TagsList from '@/components/widgets/TagsList.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getPostTagBreadcrumbs } from '@/utils/breadcrumbs';
+
+export async function getStaticPaths() {
+  const allPosts = await getAllPosts();
+  const allTags = getUniqueTags(allPosts);
+
+  return allTags.map((tag) => {
+    const filteredPosts = allPosts
+      .filter((post) => post.data.tags?.includes(tag))
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+    
+    return {
+      params: { id: slugify(tag) },
+      props: { posts: filteredPosts, tag, allTags },
+    };
+  });
+}
+
+const { posts, tag, allTags } = Astro.props;
+
+// Sort posts by date (newest first)
+const sortedPosts = sortPostsByDate(posts);
+const groupPostsByYear = siteConfig.postOptions.groupPostsByYear;
+
+// Generate SEO
+const seoData = generateIndexSEO('tags', Astro.url.href, { tag });
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getPostTagBreadcrumbs(tag);
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <!-- Page Title -->
+    <div class="animate mb-8">
+      <h1 class="text-3xl font-bold text-content-primary mb-2">
+        Posts tagged "{tag}"
+      </h1>
+      <p class="text-content-muted">
+        {sortedPosts.length} {sortedPosts.length === 1 ? 'post' : 'Posts'}
+      </p>
+    </div>
+
+    <!-- Tags List -->
+    <TagsList tags={allTags} currentTag={tag} collection="posts" showAllLink />
+
+    <ContentDisplay entries={sortedPosts} display="card" showTags={false} class="mb-8" groupByYear={groupPostsByYear} />
+
+    {sortedPosts.length === 0 && (
+      <div class="text-center py-12">
+        <p class="text-content-muted">No posts found with this tag.</p>
+      </div>
+    )}
+
+  </ContainerWrapper>
+</BaseLayout>

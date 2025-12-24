@@ -1,0 +1,69 @@
+---
+import { getAllDocs, getSeriesDocs, getUniqueSeries } from '@/utils/getDocs';
+import { generateIndexSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+import Icon from '@/components/common/IconWrapper.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getDocSeriesBreadcrumbs } from '@/utils/breadcrumbs';
+
+export async function getStaticPaths() {
+  const allDocs = await getAllDocs();
+  const allSeries = getUniqueSeries(allDocs);
+
+  return allSeries.map((seriesName) => {
+    const seriesDocs = getSeriesDocs(allDocs, seriesName);
+    const seriesSlug = seriesName.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      params: { id: seriesSlug },
+      props: { docs: seriesDocs, seriesName },
+    };
+  });
+}
+
+const { docs, seriesName } = Astro.props;
+
+// Generate SEO
+const seoData = generateIndexSEO('docs', Astro.url.href, { 
+  customTitle: `${seriesName} Series`,
+  customDescription: `All parts of the ${seriesName} series`
+});
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getDocSeriesBreadcrumbs( seriesName);
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <!-- <BackToPrevious href="/docs">Back to Notes</BackToPrevious> -->
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+    
+
+    <!-- Page Header -->
+    <div class="animate mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <Icon name="list" class="size-6 text-accent" />
+        <span class="text-sm font-medium text-accent uppercase tracking-wide">
+          Series
+        </span>
+      </div>
+      <h1 class="text-3xl font-bold text-content-primary mb-2">
+        {seriesName}
+      </h1>
+      <p class="text-content-muted">
+        {docs.length} part series
+      </p>
+    </div>
+
+    <!-- Series Parts Grid -->
+    <ContentDisplay entries={docs} display="grid" showImages={true} class="mb-8" />
+  </ContainerWrapper>
+</BaseLayout>

@@ -1,0 +1,83 @@
+---
+import type { Docs } from '@/types';
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  seriesName: string;
+  seriesDocs: Docs[];
+  currentDocId: string;
+}
+
+const { seriesName, seriesDocs, currentDocId } = Astro.props;
+
+// Calculate series progress
+const currentIndex = seriesDocs.findIndex(doc => doc.id === currentDocId);
+const totalParts = seriesDocs.length;
+const currentPart = currentIndex + 1;
+---
+
+<!-- Collapsible Series Section (all screen sizes) -->
+<details
+  class="mb-6 rounded-lg border border-ui-primary group"
+  id="series-widget"
+>
+  <summary
+    class="cursor-pointer rounded-t-lg px-4 py-3 font-medium group-open:bg-surface-raised hover:bg-surface-subtle flex items-center justify-between"
+  >
+    <div class="flex items-center gap-2">
+      <Icon name="list" class="size-4 text-accent" />
+      <span class="font-semibold text-sm">
+        From this series: {seriesName}
+      </span>
+    </div>
+    <span class="text-xs text-content-muted">
+      Part {currentPart} of {totalParts}
+    </span>
+  </summary>
+  
+  <div class="px-4 py-3 border-t border-ui-primary">
+    <!-- Progress Bar -->
+    <div class="mb-4">
+      <div class="h-1.5 bg-surface-subtle rounded-full overflow-hidden">
+        <div 
+          class="h-full bg-accent transition-all duration-300"
+          style={`width: ${(currentPart / totalParts) * 100}%`}
+        ></div>
+      </div>
+    </div>
+
+    <!-- Series List -->
+    <nav class="space-y-1">
+      {seriesDocs.map((doc, index) => {
+        const isActive = doc.id === currentDocId;
+        const partNumber = index + 1;
+        
+        return (
+          <a
+            href={`/docs/${doc.id}`}
+            class={`
+              block px-3 py-2 rounded-md text-sm transition-colors
+              ${isActive 
+                ? 'bg-accent text-white font-medium' 
+                : 'text-content-secondary hover:bg-surface-subtle hover:text-content-primary'
+              }
+            `}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <div class="flex items-start gap-2">
+              <span class={`
+                flex-shrink-0 text-xs font-mono mt-0.5
+                ${isActive ? 'text-white/80' : 'text-content-muted'}
+              `}>
+                {partNumber}.
+              </span>
+              <span class="flex-1 leading-tight">
+                {doc.data.title}
+              </span>
+            </div>
+          </a>
+        );
+      })}
+    </nav>
+  </div>
+</details>

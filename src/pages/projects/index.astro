@@ -1,0 +1,105 @@
+---
+import { getAllProjects, sortProjectsByDate, getFeaturedProjects, getUniqueTags, getTagCounts } from '@/utils/getProjects';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/ContainerWrapper.astro';
+import SEO from '@/components/common/SEO.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import ProjectGrid from '@/components/projects/ProjectGrid.astro';
+import ProjectsFilter from '@/components/projects/ProjectsFilter.astro';
+
+// Load all projects
+const allProjects = await getAllProjects();
+
+// Sort by date (newest first)
+const sortedProjects = sortProjectsByDate(allProjects);
+
+// Get featured projects
+const featuredProjects = getFeaturedProjects(sortedProjects).slice(0,2);
+
+// Get all unique tags
+const allTags = getUniqueTags(sortedProjects);
+
+// Get tag counts for display
+const tagCounts = getTagCounts(sortedProjects);
+
+// SEO data
+const seoData = {
+  title: 'Projects',
+  description: 'A showcase of my projects, tools, and applications.',
+  canonical: Astro.url.href,
+};
+
+// Breadcrumbs
+const breadcrumbs = [
+  { label: 'Projects' }
+];
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="head" />
+  
+  <Container class="py-8">
+    
+    <!-- Breadcrumbs -->
+    <div class="animate mb-8">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+    
+    <!-- Header -->
+    <div class="animate mb-12">
+      <h1 class="text-4xl font-bold text-content-primary mb-4">
+        Projects
+      </h1>
+      <p class="text-lg text-content-muted max-w-2xl">
+        A collection of projects I've built, contributed to, and open-sourced. 
+        From web applications to developer tools.
+      </p>
+    </div>
+    
+    <!-- Featured Projects -->
+    {featuredProjects.length > 0 && (
+      <section class="animate mb-16">
+        <h2 class="text-2xl font-bold text-content-primary mb-6">
+          Featured Projects
+        </h2>
+        <ProjectGrid projects={featuredProjects} columns={2} />
+      </section>
+    )}
+    
+    <!-- All Projects with Filter -->
+    <section class="animate">
+      
+      <!-- Section Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-content-primary">
+          All Projects
+          <span class="text-lg font-normal text-content-muted ml-2">
+            ({sortedProjects.length})
+          </span>
+        </h2>
+      </div>
+      
+      <!-- Tag Filter -->
+      {allTags.length > 0 && (
+        <ProjectsFilter tags={allTags} tagCounts={tagCounts} />
+      )}
+      
+      <!-- Projects Grid -->
+      <ProjectGrid projects={sortedProjects} columns={2} />
+      
+    </section>
+    
+    <!-- Empty State (if no projects) -->
+    {sortedProjects.length === 0 && (
+      <div class="animate text-center py-24">
+        <p class="text-xl text-content-muted mb-4">
+          No projects yet.
+        </p>
+        <p class="text-content-subtle">
+          Check back soon for updates!
+        </p>
+      </div>
+    )}
+    
+  </Container>
+</BaseLayout>

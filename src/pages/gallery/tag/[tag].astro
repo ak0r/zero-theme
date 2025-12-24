@@ -1,0 +1,66 @@
+---
+import { getAllGalleries, sortGalleriesByDate, getGalleriesByTag, getUniqueTags } from '@/utils/getGallery';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/layout/ContainerWrapper.astro';
+import SEO from '@/components/common/SEO.astro';
+import GalleryGrid from '@/components/gallery/GalleryGrid.astro';
+
+export const getStaticPaths = (async () => {
+  const galleries = await getAllGalleries();
+  const tags = getUniqueTags(galleries);
+  
+  return tags.map((tag) => {
+    const taggedGalleries = getGalleriesByTag(galleries, tag);
+    const sorted = sortGalleriesByDate(taggedGalleries);
+    
+    return {
+      params: { tag },
+      props: { tag, galleries: sorted },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { tag, galleries } = Astro.props;
+
+// SEO data
+const seoData = {
+  title: `Gallery: ${tag}`,
+  description: `Photo galleries tagged with "${tag}".`,
+  canonical: Astro.url.href,
+};
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="head" />
+  
+  <Container class="py-8">
+    
+    <!-- Header -->
+    <div class="animate mb-12">
+      <!-- Back Link -->
+      <a 
+        href="/gallery"
+        class="inline-flex items-center gap-2 text-content-muted hover:text-content-primary transition-colors mb-4"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Gallery
+      </a>
+      
+      <h1 class="text-4xl font-bold text-content-primary mb-4">
+        Gallery: {tag}
+      </h1>
+      <p class="text-lg text-content-muted">
+        {galleries.length} {galleries.length === 1 ? 'gallery' : 'galleries'} tagged with "{tag}"
+      </p>
+    </div>
+    
+    <!-- Galleries Grid -->
+    <div class="animate">
+      <GalleryGrid galleries={galleries} />
+    </div>
+    
+  </Container>
+</BaseLayout>

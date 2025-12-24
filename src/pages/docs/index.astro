@@ -1,0 +1,65 @@
+---
+import { getAllDocs, sortDocsByDate, getFeaturedDocs, getLatestSeries } from '@/utils/getDocs';
+import { generateIndexSEO } from '@/utils/seo';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/common/SEO.astro';
+import ContainerWrapper from '@/components/layout/ContainerWrapper.astro';
+import LatestSeries from '@/components/docs/LatestSeries.astro';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getPageBreadcrumbs } from '@/utils/breadcrumbs';
+
+// Get all docs
+const allDocs = await getAllDocs();
+const sortedDocs = sortDocsByDate(allDocs);
+
+// Get featured docs (max 4)
+const featuredDocs = getFeaturedDocs(sortedDocs).slice(0, 2);
+
+// Get latest series with 2+ articles
+const latestSeries = getLatestSeries(sortedDocs);
+
+// Generate SEO
+const seoData = generateIndexSEO('docs', Astro.url.href);
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getPageBreadcrumbs("notes");
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="seo" />
+  
+  <ContainerWrapper class="py-8">
+    <!-- Back to previous -->
+    <!-- <BackToPrevious href="/">Back to Home</BackToPrevious> -->
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <!-- Page Header -->
+    <div class="animate mb-10">
+      <h1 class="text-3xl font-bold text-content-primary mb-2">Notes</h1>
+      <p class="text-content-muted">
+        Technical guides, tips, and tutorials
+      </p>
+    </div>
+
+    <!-- Featured Notes (2-4 max) -->
+    {featuredDocs.length > 0 && (
+      // <FeaturedNotes featuredDocs={featuredDocs} />
+      <ContentDisplay entries={featuredDocs} display="grid" showImages={true} class="mb-8" />
+    )}
+
+    <!-- Latest Series (1 series, showing 2 articles) -->
+    {latestSeries && (
+      <LatestSeries 
+        seriesName={latestSeries.name} 
+        seriesDocs={latestSeries.docs} 
+      />
+    )}
+
+    <!-- All Notes List -->
+    <ContentDisplay entries={sortedDocs} title="All Notes" display="list" class="mb-8" />
+
+  </ContainerWrapper>
+</BaseLayout>

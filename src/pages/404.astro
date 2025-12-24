@@ -1,0 +1,93 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from "@/components/layout/ContainerWrapper.astro";
+import Icon from "@/components/common/IconWrapper.astro";
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import LinkWrapper from '@/components/common/LinkWrapper.astro';
+import { getBreadcrumbsFromPath } from '@/utils/breadcrumbs';
+import { get404Content } from '@/utils/page-sections';
+
+// Load optional 404 content sections
+const sections = await get404Content();
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+---
+
+<BaseLayout>
+  <Container class="py-8">
+    
+    <!-- Breadcrumbs -->
+    <div class="animate mb-8">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 404 MESSAGE (Optional from 404-message.md OR default) -->
+    <!-- ============================================================ -->
+    <div class="min-h-[40vh] flex flex-col items-center justify-center py-12 gap-6">
+      
+      {sections.message ? (
+        <!-- Custom 404 message from markdown -->
+        <div class="animate prose max-w-2xl text-center">
+          <Icon name="file-x" class="size-12 text-content-muted mx-auto mb-4" />
+          <sections.message.Content />
+        </div>
+      ) : (
+        <!-- Default 404 message -->
+        <div class="animate text-center">
+          <Icon name="file-x" class="size-12 text-content-muted mx-auto mb-4" />
+          <h2 class="text-4xl font-bold text-content-primary mb-2">404</h2>
+          <h3 class="text-xl font-semibold text-content-muted mb-4">
+            Page Not Found
+          </h3>
+          <p class="text-content-subtle max-w-md mx-auto">
+            The page you're looking for doesn't exist or has been moved.
+          </p>
+        </div>
+      )}
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SUGGESTIONS (Optional from 404-suggestions.md OR default) -->
+    <!-- ============================================================ -->
+    {sections.suggestions ? (
+      <!-- Custom suggestions from markdown -->
+      <div class="animate prose max-w-2xl mx-auto mb-12">
+        <sections.suggestions.Content />
+      </div>
+    ) : (
+      <!-- Default helpful links -->
+      <div class="animate max-w-2xl mx-auto mb-12">
+        <h4 class="text-lg font-semibold mb-4 text-center">Here are some helpful links:</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <LinkWrapper 
+            href="/" 
+            class="block p-4 border border-ui-primary rounded-lg hover:bg-surface-subtle text-center"
+          >
+            <div class="font-medium">Home</div>
+            <div class="text-sm text-content-muted">Go to homepage</div>
+          </LinkWrapper>
+          
+          <LinkWrapper 
+            href="/posts" 
+            class="block p-4 border border-ui-primary rounded-lg hover:bg-surface-subtle text-center"
+          >
+            <div class="font-medium">Blog Posts</div>
+            <div class="text-sm text-content-muted">Browse all posts</div>
+          </LinkWrapper>
+          
+          <LinkWrapper 
+            href="/docs" 
+            class="block p-4 border border-ui-primary rounded-lg hover:bg-surface-subtle text-center"
+          >
+            <div class="font-medium">Documentation</div>
+            <div class="text-sm text-content-muted">Read the docs</div>
+          </LinkWrapper>
+        </div>
+      </div>
+    )}
+
+  </Container>
+</BaseLayout>

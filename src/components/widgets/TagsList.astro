@@ -1,0 +1,87 @@
+---
+import LinkWrapper from '@/components/common/LinkWrapper.astro';
+
+export interface Props {
+  tags: string[];
+  collection?: 'posts' | 'docs' | string;
+  currentTag?: string;
+  showAllLink?: boolean;
+  showTitle?: boolean;
+  title?: string;
+  class?: string;
+}
+
+const {
+  tags = [],
+  collection = 'posts',
+  currentTag,
+  showAllLink = true,
+  showTitle = false,
+  title,
+  class: className = '',
+} = Astro.props;
+
+// Sort tags alphabetically
+const sortedTags = [...tags].sort();
+
+// Generate paths based on collection
+const basePath = `/${collection}`;
+const tagBasePath = `/${collection}/tag`;
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => 
+  currentPath === href || currentPath === href + '/';
+
+// Page title
+const pageTitle = title || (currentTag 
+  ? `${collection.charAt(0).toUpperCase() + collection.slice(1)} tagged "${currentTag}"`
+  : `All ${collection.charAt(0).toUpperCase() + collection.slice(1)} Tags`
+);
+---
+
+<section class:list={['tags-list space-y-2 mb-8', className]}>
+  {showTitle && pageTitle && (
+    <h2 class="font-medium mb-4 text-content-subtle">
+      {pageTitle}
+    </h2>
+  )}
+  
+  <div class="flex flex-wrap gap-2">
+    {/* All link */}
+    {showAllLink && (
+      <LinkWrapper
+        href={basePath}
+        variant="tag"
+        underline
+        active={isActive(basePath)}
+      >
+        <span>#all</span>
+      </LinkWrapper>
+    )}
+
+    {/* Tags */}
+    {tags.length === 0 ? (
+      <div class="py-2 text-content-muted text-sm">
+        No tags available yet.
+      </div>
+    ) : (
+      sortedTags.map((tag) => {
+        const slug = tag.toLowerCase().replace(/\s+/g, '-');
+        const href = `${tagBasePath}/${slug}`;
+        const active = isActive(href) || currentTag === tag;
+
+        return (
+          <LinkWrapper
+            href={href}
+            variant="tag"
+            active={active}
+            underline
+            data-pagefind-filter="tag"
+          >
+            <span>#{tag}</span>
+          </LinkWrapper>
+        );
+      })
+    )}
+  </div>
+</section>

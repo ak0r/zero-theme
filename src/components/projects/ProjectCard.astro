@@ -1,0 +1,112 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from '@/components/common/IconWrapper.astro';
+
+type Project = CollectionEntry<'projects'>;
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { title, description, projectUrl, repositoryUrl, image, imageAlt, tags, status } = project.data;
+
+// Status badges
+const statusConfig = {
+  active: { label: 'Active', class: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' },
+  wip: { label: 'In Progress', class: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' },
+  archived: { label: 'Archived', class: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' },
+};
+
+const currentStatus = statusConfig[status] || statusConfig.active;
+---
+
+<article class="project-card group relative flex flex-col h-full border border-ui-primary rounded-lg overflow-hidden bg-surface-primary hover:shadow-lg transition-all duration-300">
+  
+  <!-- Project Image -->
+  {image && (
+    <div class="aspect-video overflow-hidden bg-surface-subtle">
+      <img 
+        src={image} 
+        alt={imageAlt || title}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+      />
+    </div>
+  )}
+  
+  <!-- Content -->
+  <div class="flex-1 flex flex-col p-6">
+    
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-4 mb-3">
+      <h3 class="text-xl font-semibold text-content-primary group-hover:text-accent transition-colors">
+        {title}
+      </h3>
+      
+      <!-- Status Badge -->
+      {status !== 'active' && (
+        <span class={`px-2 py-1 text-xs font-medium rounded ${currentStatus.class} shrink-0`}>
+          {currentStatus.label}
+        </span>
+      )}
+    </div>
+    
+    <!-- Description -->
+    <p class="text-content-muted mb-4 flex-1">
+      {description}
+    </p>
+    
+    <!-- Tags -->
+    {tags.length > 0 && (
+      <div class="tags flex flex-wrap gap-2 mb-4">
+        {tags.map((tag) => (
+          <span class="px-2 py-1 text-xs bg-surface-subtle text-content-muted rounded border border-ui-primary">
+            {tag}
+          </span>
+        ))}
+      </div>
+    )}
+    
+    <!-- Links -->
+    <div class="flex items-center gap-3 pt-4 border-t border-ui-primary">
+      
+      <!-- Project Link -->
+      <a 
+        href={projectUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
+        aria-label={`Visit ${title}`}
+      >
+        <Icon name="external-link" class="size-4" />
+        <span>Visit Project</span>
+      </a>
+      
+      <!-- Repository Link -->
+      {repositoryUrl && (
+        <a 
+          href={repositoryUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-sm font-medium text-content-muted hover:text-content-primary transition-colors"
+          aria-label={`View ${title} repository`}
+        >
+          <Icon name="brand-github" class="size-4" />
+          <span>Code</span>
+        </a>
+      )}
+      
+    </div>
+    
+  </div>
+  
+</article>
+
+<style>
+  .project-card {
+    /* Ensure consistent height in grid */
+    display: flex;
+    flex-direction: column;
+  }
+</style>

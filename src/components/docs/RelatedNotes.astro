@@ -1,0 +1,77 @@
+---
+import type { Docs } from '@/types';
+import Icon from '@/components/common/IconWrapper.astro';
+
+interface Props {
+  relatedDocs: Docs[];
+}
+
+const { relatedDocs } = Astro.props;
+---
+
+{relatedDocs.length > 0 && (
+  <section class="mt-12 pt-8 border-t border-ui-primary">
+    <!-- Section Header -->
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <Icon name="link" class="size-5 text-accent" />
+        <h2 class="text-lg font-semibold text-content-primary">
+          Related Notes
+        </h2>
+      </div>
+      <p class="text-sm text-content-muted">
+        You might also find these helpful
+      </p>
+    </div>
+
+    <!-- Related Notes Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {relatedDocs.map((doc) => (
+        <a
+          href={`/docs/${doc.id}`}
+          class="group block p-4 rounded-lg border border-ui-primary bg-surface-primary hover:bg-surface-subtle hover:border-accent transition-all"
+        >
+          <article class="space-y-2">
+            <!-- Title -->
+            <h3 class="font-medium text-content-primary group-hover:text-accent transition-colors line-clamp-2 leading-tight">
+              {doc.data.title}
+            </h3>
+
+            <!-- Description -->
+            {doc.data.description && (
+              <p class="text-sm text-content-muted line-clamp-2 leading-relaxed">
+                {doc.data.description}
+              </p>
+            )}
+
+            <!-- Tags -->
+            {doc.data.tags && doc.data.tags.length > 0 && (
+              <div class="flex flex-wrap gap-1 pt-2">
+                {doc.data.tags.slice(0, 3).map(tag => (
+                  <span class="inline-block px-2 py-0.5 text-xs text-content-subtle bg-surface-raised rounded">
+                    {tag}
+                  </span>
+                ))}
+                {doc.data.tags.length > 3 && (
+                  <span class="inline-block px-2 py-0.5 text-xs text-content-subtle">
+                    +{doc.data.tags.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <!-- Series Badge (if part of series) -->
+            {doc.data.series && (
+              <div class="flex items-center gap-1 pt-1">
+                <Icon name="list" class="size-3 text-accent" />
+                <span class="text-xs text-accent font-medium">
+                  {doc.data.series}
+                </span>
+              </div>
+            )}
+          </article>
+        </a>
+      ))}
+    </div>
+  </section>
+)}

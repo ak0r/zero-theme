@@ -1,0 +1,123 @@
+---
+import siteConfig from '@/site.config';
+import { getAllPosts, getFeaturedPosts } from '@/utils/getPosts';
+import { processPost } from '@/utils/content';
+import { getHomeContent } from '@/utils/page-sections';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import LinkWrapper from '@/components/common/LinkWrapper.astro';
+import Container from "@/components/layout/ContainerWrapper.astro";
+import SEO from '@/components/common/SEO.astro';
+import { generateHomeSEO } from '@/utils/seo';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+
+// Load optional content sections
+const sections = await getHomeContent();
+
+// Filter posts based on environment
+const allPosts = await getAllPosts();
+
+// Get featured posts
+const featuredPosts = getFeaturedPosts(allPosts);
+
+// Process posts for reading time and word count
+const processedPosts = await Promise.all(
+  allPosts.map(async (post) => await processPost(post))
+) as any[];
+
+// Get featured post based on configuration
+let featuredPost = null;
+if (siteConfig.homeOptions.featuredPost.enabled) {
+  featuredPost = processedPosts[0];
+}
+
+// Get preview posts based on whether featured post is shown
+const previewPosts = featuredPost
+  ? processedPosts.slice(1, siteConfig.homeOptions.recentPosts.count + 1)
+  : processedPosts.slice(0, siteConfig.homeOptions.recentPosts.count);
+
+const seoData = generateHomeSEO(Astro.url.href);
+---
+
+<BaseLayout>
+  <SEO data={seoData} slot="head" />
+  <Container class="py-8">
+    
+    <!-- ============================================================ -->
+    <!-- HERO SECTION (Optional from home-hero.md) -->
+    <!-- ============================================================ -->
+    {sections.hero ? (
+      <section class="animate mb-12">
+        <sections.hero.Content />
+      </section>
+    ) : (
+      <section class="animate mb-12">
+        <h1 class="text-4xl font-bold mb-4">Welcome to My Blog</h1>
+        <p class="text-lg text-content-subtle">
+          Insights, tutorials, and stories about web development and technology.
+        </p>
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- INTRO SECTION (Optional from home-intro.md) -->
+    <!-- ============================================================ -->
+    {sections.intro && (
+      <section class="animate mb-12 prose max-w-none">
+        <sections.intro.Content />
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- FEATURED POST -->
+    <!-- ============================================================ -->
+    {featuredPost && (
+      <section class="animate mb-12">
+        <div class="flex items-center mb-6">
+          <h2 class="text-lg font-semibold">Featured Post</h2>
+        </div>
+        <ContentDisplay 
+          entries={featuredPosts} 
+          display="card" 
+          showImages={true} 
+          class="mb-8"
+        />
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- RECENT POSTS -->
+    <!-- ============================================================ -->
+    {previewPosts.length > 0 && (
+      <section class="animate mb-12">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold">Recent Posts</h2>
+          <LinkWrapper href="/posts" class="font-medium">
+            View all posts
+          </LinkWrapper>
+        </div>
+        <div class="space-y-4">
+          <ContentDisplay entries={previewPosts} display="card" class="mb-8" />
+        </div>
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- ABOUT SECTION (Optional from home-about.md) -->
+    <!-- ============================================================ -->
+    {sections.about && (
+      <section class="animate mb-12 prose max-w-none">
+        <sections.about.Content />
+      </section>
+    )}
+
+    <!-- ============================================================ -->
+    <!-- CTA SECTION (Optional from home-cta.md) -->
+    <!-- ============================================================ -->
+    {sections.cta && (
+      <section class="animate mb-12">
+        <sections.cta.Content />
+      </section>
+    )}
+
+  </Container>
+</BaseLayout>

@@ -1,0 +1,52 @@
+---
+import type { Docs } from '@/types';
+import { resolveImage } from '@/utils/images';
+import ImageWrapper from '@/components/common/ImageWrapper.astro';
+import Icon from '@/components/common/IconWrapper.astro';
+import { isValidDate } from '@/utils/content';
+import ContentDisplay from '@/components/content/ContentDisplay.astro';
+
+interface Props {
+  seriesName: string;
+  seriesDocs: Docs[];
+}
+
+const { seriesName, seriesDocs } = Astro.props;
+
+// Get latest 2 docs from the series (already sorted by seriesOrder)
+const displayDocs = seriesDocs.slice(0, 2);
+const totalParts = seriesDocs.length;
+---
+
+{displayDocs.length > 0 && (
+  <section class="mb-12 animate">
+    <!-- Section Header -->
+    <div class="mb-8 pb-4 border-b border-ui-primary">
+      <div class="flex items-center gap-2 mb-2">
+        {/* <Icon name="list" class="size-5 text-accent" /> */}
+        <h2 class="text-xl font-bold text-content-primary">
+          Latest Series
+        </h2>
+      </div>
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <p class="text-lg font-semibold text-content-primary">
+            {seriesName}
+          </p>
+          <p class="text-sm text-content-muted">
+            {totalParts} part series
+          </p>
+        </div>
+        <a
+          href={`/docs/series/${encodeURIComponent(seriesName.toLowerCase().replace(/\s+/g, '-'))}`}
+          class="inline-flex items-center gap-1 text-sm text-accent hover:underline"
+        >
+          View all parts
+          <Icon name="arrow-right" class="size-4" />
+        </a>
+      </div>
+    </div>
+
+    <ContentDisplay entries={displayDocs} display="grid" showImages={true} class="mb-8" />
+  </section>
+)}

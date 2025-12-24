@@ -1,0 +1,165 @@
+---
+interface Props {
+  tags: string[];
+  tagCounts?: Record<string, number>;
+}
+
+const { tags, tagCounts = {} } = Astro.props;
+---
+
+<div class="gallery-filter mb-8" data-gallery-filter>
+  
+  <!-- Filter Controls -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    
+    <!-- Title -->
+    <h3 class="text-lg font-semibold text-content-primary">
+      Filter by Tag
+    </h3>
+    
+    <!-- Clear Button -->
+    <button 
+      type="button"
+      data-clear-filters
+      class="hidden text-sm text-accent hover:text-accent-hover transition-colors"
+    >
+      Clear filters
+    </button>
+    
+  </div>
+  
+  <!-- Tags -->
+  <div class="flex flex-wrap gap-2">
+    {tags.map((tag) => {
+      const count = tagCounts[tag] || 0;
+      return (
+        <button 
+          type="button"
+          data-tag={tag}
+          class="tag-filter px-3 py-1.5 text-sm border border-ui-primary rounded-full bg-surface-primary text-content-muted hover:bg-surface-subtle hover:text-content-primary transition-all"
+        >
+          {tag}
+          {count > 0 && (
+            <span class="ml-1.5 text-xs opacity-60">({count})</span>
+          )}
+        </button>
+      );
+    })}
+  </div>
+  
+</div>
+
+<script>
+  // Client-side tag filtering
+  function initGalleryFilter() {
+    const filterContainer = document.querySelector('[data-gallery-filter]');
+    if (!filterContainer) {
+      console.log('Gallery filter container not found');
+      return;
+    }
+    
+    const tagButtons = filterContainer.querySelectorAll('[data-tag]');
+    const clearButton = filterContainer.querySelector('[data-clear-filters]') as HTMLButtonElement;
+    const galleryCards = document.querySelectorAll('.gallery-card');
+    
+    console.log('Gallery filter initialized:', {
+      tagButtons: tagButtons.length,
+      galleryCards: galleryCards.length,
+    });
+    
+    const activeTags = new Set<string>();
+    
+    // Update visibility
+    function updateGalleries() {
+      let visibleCount = 0;
+      
+      galleryCards.forEach((card) => {
+        // Get tags from the card's tag container
+        const cardTagSpans = card.querySelectorAll('span[class*="px-2"]');
+        const cardTags = Array.from(cardTagSpans)
+          .map(span => span.textContent?.trim())
+          .filter(Boolean);
+        
+        // Show if no filters active OR card has all active tags
+        const shouldShow = activeTags.size === 0 || 
+          Array.from(activeTags).every(filterTag => 
+            cardTags.some(cardTag => 
+              cardTag?.toLowerCase() === filterTag.toLowerCase()
+            )
+          );
+        
+        if (shouldShow) {
+          (card as HTMLElement).style.display = '';
+          visibleCount++;
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+      
+      console.log('Updated gallery visibility:', {
+        activeTags: Array.from(activeTags),
+        visibleCount,
+      });
+      
+      // Show/hide clear button
+      if (activeTags.size > 0) {
+        clearButton?.classList.remove('hidden');
+      } else {
+        clearButton?.classList.add('hidden');
+      }
+    }
+    
+    // Tag click handler
+    tagButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const tag = button.getAttribute('data-tag');
+        if (!tag) return;
+        
+        console.log('Tag clicked:', tag);
+        
+        // Toggle tag
+        if (activeTags.has(tag)) {
+          activeTags.delete(tag);
+          button.classList.remove('bg-accent', 'text-white', 'border-accent');
+          button.classList.add('bg-surface-primary', 'text-content-muted');
+        } else {
+          activeTags.add(tag);
+          button.classList.add('bg-accent', 'text-white', 'border-accent');
+          button.classList.remove('bg-surface-primary', 'text-content-muted');
+        }
+        
+        updateGalleries();
+      });
+    });
+    
+    // Clear filters
+    clearButton?.addEventListener('click', () => {
+      console.log('Clearing filters');
+      activeTags.clear();
+      
+      // Reset all buttons
+      tagButtons.forEach((button) => {
+        button.classList.remove('bg-accent', 'text-white', 'border-accent');
+        button.classList.add('bg-surface-primary', 'text-content-muted');
+      });
+      
+      updateGalleries();
+    });
+  }
+  
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGalleryFilter);
+  } else {
+    initGalleryFilter();
+  }
+  
+  // Reinitialize on view transitions
+  document.addEventListener('astro:page-load', initGalleryFilter);
+</script>
+
+<style>
+  .tag-filter.bg-accent {
+    color: white;
+  }
+</style>
