@@ -19,7 +19,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { gallery } = Astro.props;
-const { title, description, tags } = gallery.data;
+const { title, description, date, tags } = gallery.data;
 
 const galleryDir = extractGalleryDir(gallery.filePath);
 
@@ -47,7 +47,11 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 
     <!-- Header -->
     <div class="animate mb-8">
-      
+      <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-meta="title[content]" content={title} />
+      <!-- <meta data-pagefind-meta="description[content]" content={post.data.description} /> -->
+      <meta data-pagefind-sort="date[content]" content={date.toISOString()} />
+
       <h1 class="text-4xl font-bold text-content-primary mb-4">
         {title}
       </h1>
