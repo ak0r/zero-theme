@@ -3,11 +3,13 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "node scripts/sync-attachments.js && astro dev",
-    "build": "node scripts/sync-attachments.js && astro build",
+    "dev": "npm run sync-content && node scripts/sync-attachments.js && astro dev",
+    "build": "npm run sync-content && node scripts/sync-attachments.js && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "sync-attachments": "node scripts/sync-attachments.js"
+    "sync-attachments": "node scripts/sync-attachments.js",
+    "sync-content": "git submodule update --remote && echo '✅ Content synced from remote'",
+    "sync-content:init": "git submodule update --init --recursive && echo '✅ Submodule initialized'"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.12",
