@@ -20,3 +20,6 @@ Thumbs.db
 
 # Obsidian
 .obsidian/
+
+# Pagefind
+public/pagefind/

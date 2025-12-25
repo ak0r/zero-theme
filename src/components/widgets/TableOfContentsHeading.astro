@@ -1,22 +1,39 @@
 ---
+/**
+ * TableOfContentsHeading Component
+ * 
+ * Recursive component for rendering TOC headings with nested subheadings.
+ * Uses proper TypeScript types and safe property access.
+ */
+
 import type { Heading } from "@/types";
 import LinkWrapper from "@/components/common/LinkWrapper.astro";
-// https://kld.dev/building-table-of-contents/
+
+// Extended heading type with subheadings
+interface TocHeading extends Heading {
+  subheadings: TocHeading[];
+}
+
+interface Props {
+  heading: TocHeading;
+}
 
 const { heading } = Astro.props;
+
+// Safely check for subheadings
+const hasSubheadings = heading.subheadings && heading.subheadings.length > 0;
 ---
 
 <li class="list-inside">
-  <LinkWrapper href={"#" + heading.slug} underline>
+  <LinkWrapper href={`#${heading.slug}`} underline>
     {heading.text}
   </LinkWrapper>
-  {
-    heading.subheadings.length > 0 && (
-      <ul class="translate-x-3">
-        {heading.subheadings.map((subheading: Heading) => (
-          <Astro.self heading={subheading} />
-        ))}
-      </ul>
-    )
-  }
+  
+  {hasSubheadings && (
+    <ul class="translate-x-3">
+      {heading.subheadings.map((subheading: TocHeading) => (
+        <Astro.self heading={subheading} />
+      ))}
+    </ul>
+  )}
 </li>

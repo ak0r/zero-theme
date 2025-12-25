@@ -58,7 +58,7 @@ export function getProjectsByTag(projects: Project[], tag: string): Project[] {
  * Get all unique tags
  * Uses generic getUniqueTags
  */
-export function getUniqueTags(projects: Project[]): string[] {
+export function getUniqueProjectTags(projects: Project[]): string[] {
   return getUniqueTags(projects);
 }
 
@@ -66,7 +66,7 @@ export function getUniqueTags(projects: Project[]): string[] {
  * Get tag counts
  * Uses generic getTagCounts
  */
-export function getTagCounts(projects: Project[]): Record<string, number> {
+export function getProjectTagCounts(projects: Project[]): Record<string, number> {
   return getTagCounts(projects);
 }
 

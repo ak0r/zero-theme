@@ -1,5 +1,5 @@
 ---
-import { getAllProjects, sortProjectsByDate, getFeaturedProjects, getUniqueTags, getTagCounts } from '@/utils/getProjects';
+import { getAllProjects, sortProjectsByDate, getFeaturedProjects, getUniqueProjectTags, getProjectTagCounts } from '@/utils/getProjects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/ContainerWrapper.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -17,10 +17,10 @@ const sortedProjects = sortProjectsByDate(allProjects);
 const featuredProjects = getFeaturedProjects(sortedProjects).slice(0,2);
 
 // Get all unique tags
-const allTags = getUniqueTags(sortedProjects);
+const allTags = getUniqueProjectTags(sortedProjects);
 
 // Get tag counts for display
-const tagCounts = getTagCounts(sortedProjects);
+const tagCounts = getProjectTagCounts(sortedProjects);
 
 // SEO data
 const seoData = {
@@ -42,7 +42,7 @@ const breadcrumbs = [
     
     <!-- Breadcrumbs -->
     <div class="animate mb-8">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
     
     <!-- Header -->

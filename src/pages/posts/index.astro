@@ -1,6 +1,6 @@
 ---
 import { siteConfig } from '@/site.config';
-import { getAllPosts, sortPostsByDate, getUniqueTags } from '@/utils/getPosts';
+import { getAllPosts, sortPostsByDate, getUniquePostTags } from '@/utils/getPosts';
 import { generateIndexSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -29,7 +29,7 @@ const paginatedPosts = sortedPosts.slice(startIndex, endIndex);
 const groupPostsByYear = siteConfig.postOptions.groupPostsByYear === true;
 
 // Get all unique tags
-const allTags = getUniqueTags(sortedPosts);
+const allTags = getUniquePostTags(sortedPosts);
 
 // Pagination info
 const pagination = {
@@ -55,7 +55,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
     <!-- Back to previous -->
     <!-- <BackToPrevious href="/">Back to Home</BackToPrevious> -->
     <div class="animate">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
 
     <!-- Page Title -->

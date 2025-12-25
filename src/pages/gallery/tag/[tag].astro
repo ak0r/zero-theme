@@ -1,14 +1,17 @@
 ---
-import { getAllGalleries, sortGalleriesByDate, getGalleriesByTag, getUniqueTags } from '@/utils/getGallery';
+import { getAllGalleries, sortGalleriesByDate, getGalleriesByTag, getUniqueGalleryTags } from '@/utils/getGallery';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/ContainerWrapper.astro';
 import SEO from '@/components/common/SEO.astro';
 import GalleryGrid from '@/components/gallery/GalleryGrid.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getBreadcrumbsFromPath } from '@/utils/breadcrumbs';
+
 
 export const getStaticPaths = (async () => {
   const galleries = await getAllGalleries();
-  const tags = getUniqueTags(galleries);
+  const tags = getUniqueGalleryTags(galleries);
   
   return tags.map((tag) => {
     const taggedGalleries = getGalleriesByTag(galleries, tag);
@@ -29,6 +32,9 @@ const seoData = {
   description: `Photo galleries tagged with "${tag}".`,
   canonical: Astro.url.href,
 };
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
 ---
 
 <BaseLayout>
@@ -36,19 +42,12 @@ const seoData = {
   
   <Container class="py-8">
     
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
+    </div>
+    
     <!-- Header -->
     <div class="animate mb-12">
-      <!-- Back Link -->
-      <a 
-        href="/gallery"
-        class="inline-flex items-center gap-2 text-content-muted hover:text-content-primary transition-colors mb-4"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Gallery
-      </a>
-      
       <h1 class="text-4xl font-bold text-content-primary mb-4">
         Gallery: {tag}
       </h1>

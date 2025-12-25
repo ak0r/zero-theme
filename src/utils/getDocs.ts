@@ -98,7 +98,7 @@ export function getSeriesDocs(docs: Docs[], seriesName: string): Docs[] {
 /**
  * Get unique series names from docs
  */
-export function getUniqueSeries(docs: Docs[]): string[] {
+export function getUniqueDocsSeries(docs: Docs[]): string[] {
   return getUniqueSeries(docs);
 }
 
@@ -112,7 +112,7 @@ export function getAllSeriesWithDocs(docs: Docs[]): Map<string, Docs[]> {
 /**
  * Get the most recent series with 2+ docs
  */
-export function getLatestSeries(
+export function getLatestDocsSeries(
   docs: Docs[]
 ): { name: string; docs: Docs[] } | null {
   const result = getLatestSeries(docs);

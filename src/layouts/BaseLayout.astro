@@ -14,6 +14,7 @@ import ScrollScript from '@/components/scripts/ScrollScript.astro';
 import AnimationScript from '@/components/scripts/AnimationScript.astro';
 import CollapsibleCalloutsScript from '@/components/scripts/CollapsibleCalloutsScript.astro';
 import CommandPalette from '@/components/widgets/CommandPalette.astro';
+import PagefindSearch from '@/components/widgets/PagefindSearch.astro';
 
 export interface Props {
   bodyClass?: string;
@@ -60,7 +61,8 @@ const themeHash = generateThemeHash(siteConfig.featureButton, defaultTheme, ligh
     
     <!-- Twitter Widgets Script -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
+    <!-- <link href="/pagefind/pagefind-ui.css" rel="stylesheet" /> -->
+    <!-- <script src="/pagefind/pagefind-ui.js" is:inline /> -->
   </head>
 
   <body class={`min-h-screen ${bodyClass}`}>
@@ -87,9 +89,13 @@ const themeHash = generateThemeHash(siteConfig.featureButton, defaultTheme, ligh
 
     <!-- Widgets -->
     {siteConfig.scrollToTop && <ScrollToTop />}
+
     <ImageGalleryManager />
-     {siteConfig.commandPaletteConfig.enabled && <CommandPalette />}
-     
+    
+    {siteConfig.commandPaletteConfig.enabled && <CommandPalette />}
+    
+    <!-- {siteConfig.commandPaletteConfig.search.enabled && <PagefindSearch />} -->
+
     <!-- Scripts -->
     <ScrollScript />
     <AnimationScript />

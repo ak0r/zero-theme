@@ -1,5 +1,5 @@
 ---
-import { getAllDocs, getSeriesDocs, getUniqueSeries } from '@/utils/getDocs';
+import { getAllDocs, getSeriesDocs, getUniqueDocsSeries } from '@/utils/getDocs';
 import { generateIndexSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -11,7 +11,7 @@ import { getDocSeriesBreadcrumbs } from '@/utils/breadcrumbs';
 
 export async function getStaticPaths() {
   const allDocs = await getAllDocs();
-  const allSeries = getUniqueSeries(allDocs);
+  const allSeries = getUniqueDocsSeries(allDocs);
 
   return allSeries.map((seriesName) => {
     const seriesDocs = getSeriesDocs(allDocs, seriesName);
@@ -43,7 +43,7 @@ const breadcrumbs = getDocSeriesBreadcrumbs( seriesName);
     <!-- Back to previous -->
     <!-- <BackToPrevious href="/docs">Back to Notes</BackToPrevious> -->
     <div class="animate">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
     
 

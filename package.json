@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "npm run sync-content && node scripts/sync-attachments.js && astro dev",
-    "build": "npm run sync-content && node scripts/sync-attachments.js && astro build",
+    "build": "npm run sync-content && node scripts/sync-attachments.js && astro build && npx pagefind --source dist && cp -r dist/pagefind public/",
     "preview": "astro preview",
     "astro": "astro",
     "sync-attachments": "node scripts/sync-attachments.js",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.12",
+    "@pagefind/default-ui": "^1.4.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/hast": "^3.0.4",
     "@types/unist": "^3.0.3",
@@ -35,6 +36,7 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@tailwindcss/typography": "^0.5.19",
+    "pagefind": "^1.4.0",
     "semantic-release": "^25.0.2"
   }
 }

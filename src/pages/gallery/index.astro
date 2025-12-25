@@ -1,5 +1,5 @@
 ---
-import { getAllGalleries, sortGalleriesByDate, getUniqueTags, getTagCounts } from '@/utils/getGallery';
+import { getAllGalleries, sortGalleriesByDate, getUniqueGalleryTags, getGalleryTagCounts } from '@/utils/getGallery';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/layout/ContainerWrapper.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -16,10 +16,10 @@ const allGalleries = await getAllGalleries();
 const sortedGalleries = sortGalleriesByDate(allGalleries);
 
 // Get all unique tags
-const allTags = getUniqueTags(sortedGalleries);
+const allTags = getUniqueGalleryTags(sortedGalleries);
 
 // Get tag counts for display
-const tagCounts = getTagCounts(sortedGalleries);
+const tagCounts = getGalleryTagCounts(sortedGalleries);
 
 // SEO data
 const seoData = {
@@ -38,7 +38,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
   
   <Container class="py-8">
     <div class="animate">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
     
     <!-- Header -->

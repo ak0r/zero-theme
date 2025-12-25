@@ -6,7 +6,7 @@ import type { CollectionEntry } from "astro:content";
 const imageExt = /\.(png|jpe?g|webp|avif|gif|svg)$/i;
 
 // Remove Obsidian-style brackets from a string
-function stripObsidianBrackets(value: string): string {
+export function stripObsidianBrackets(value: string): string {
   if (value.startsWith("[[") && value.endsWith("]]")) {
     return value.slice(2, -2);
   }

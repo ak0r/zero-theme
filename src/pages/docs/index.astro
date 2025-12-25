@@ -1,5 +1,5 @@
 ---
-import { getAllDocs, sortDocsByDate, getFeaturedDocs, getLatestSeries } from '@/utils/getDocs';
+import { getAllDocs, sortDocsByDate, getFeaturedDocs, getLatestDocsSeries } from '@/utils/getDocs';
 import { generateIndexSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -17,7 +17,7 @@ const sortedDocs = sortDocsByDate(allDocs);
 const featuredDocs = getFeaturedDocs(sortedDocs).slice(0, 2);
 
 // Get latest series with 2+ articles
-const latestSeries = getLatestSeries(sortedDocs);
+const latestSeries = getLatestDocsSeries(sortedDocs);
 
 // Generate SEO
 const seoData = generateIndexSEO('docs', Astro.url.href);
@@ -33,7 +33,7 @@ const breadcrumbs = getPageBreadcrumbs("notes");
     <!-- Back to previous -->
     <!-- <BackToPrevious href="/">Back to Home</BackToPrevious> -->
     <div class="animate">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
 
     <!-- Page Header -->

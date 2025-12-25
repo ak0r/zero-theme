@@ -1,6 +1,8 @@
 ---
+// import { PagefindUI } from '@pagefind/default-ui';
 import { siteConfig } from '@/site.config';
 import Icon from '@/components/common/IconWrapper.astro';
+import '@pagefind/default-ui/css/ui.css';
 
 const config = siteConfig.commandPaletteConfig;
 
@@ -8,39 +10,43 @@ const config = siteConfig.commandPaletteConfig;
 const quickActions = config.quickActions.enabled ? config.quickActions.actions : [];
 const navigationLinks = config.navigation.enabled ? config.navigation.links : [];
 const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
-
-// Collection badges configuration
-const collectionConfig = {
-  posts: { label: 'Post', color: 'bg-blue-500' },
-  docs: { label: 'Doc', color: 'bg-green-500' },
-  projects: { label: 'Project', color: 'bg-purple-500' },
-  pages: { label: 'Page', color: 'bg-orange-500' },
-};
 ---
+
+<!-- Pagefind UI CSS -->
+<!-- <link href="/pagefind/pagefind-ui.css" rel="stylesheet" /> -->
 
 <div id="command-palette-backdrop" class="command-palette-backdrop">
   <div class="command-palette-modal">
     
-    <!-- Search Input -->
-    <div class="command-palette-input-wrapper">
-      <Icon name="search" class="command-palette-search-icon" />
-      <input
-        id="command-palette-input"
-        class="command-palette-input"
-        type="text"
-        placeholder={config.search.placeholder}
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <kbd class="command-palette-hint">ESC</kbd>
+    <!-- Mode Toggle Tabs -->
+    <div class="command-palette-tabs">
+      <button 
+        id="tab-commands" 
+        class="command-palette-tab active"
+        data-mode="command"
+      >
+        <Icon name="command" class="w-4 h-4" />
+        Commands
+      </button>
+      <button 
+        id="tab-search" 
+        class="command-palette-tab"
+        data-mode="search"
+      >
+        <Icon name="search" class="w-4 h-4" />
+        Search
+      </button>
+      <button id="close-palette" class="command-palette-close">
+        <Icon name="x" class="w-4 h-4" />
+      </button>
     </div>
 
-    <!-- Results List -->
-    <div id="command-palette-results" class="command-palette-results">
+    <!-- Commands Mode -->
+    <div id="commands-mode" class="command-palette-mode active">
       
       <!-- Quick Actions Section -->
       {quickActions.length > 0 && (
-        <div class="command-palette-section" data-section="quick-actions">
+        <div class="command-palette-section">
           <div class="command-palette-section-title">Quick Actions</div>
           <ul class="command-palette-list">
             {quickActions.map((action) => (
@@ -59,7 +65,7 @@ const collectionConfig = {
 
       <!-- Navigation Section -->
       {navigationLinks.length > 0 && (
-        <div class="command-palette-section" data-section="navigation">
+        <div class="command-palette-section">
           <div class="command-palette-section-title">Navigation</div>
           <ul class="command-palette-list">
             {navigationLinks.map((link) => (
@@ -79,7 +85,7 @@ const collectionConfig = {
 
       <!-- Social Links Section -->
       {socialLinks.length > 0 && (
-        <div class="command-palette-section" data-section="social">
+        <div class="command-palette-section">
           <div class="command-palette-section-title">Social</div>
           <ul class="command-palette-list">
             {socialLinks.map((social) => (
@@ -96,21 +102,11 @@ const collectionConfig = {
           </ul>
         </div>
       )}
+    </div>
 
-      <!-- Search Results Section (populated by JS) -->
-      <div class="command-palette-section hidden" data-section="search-results">
-        <div class="command-palette-section-title">Search Results</div>
-        <ul id="search-results-list" class="command-palette-list">
-          <!-- Populated dynamically -->
-        </ul>
-      </div>
-
-      <!-- No Results Message -->
-      <div id="no-results" class="command-palette-empty hidden">
-        <Icon name="search" class="command-palette-empty-icon" />
-        <p class="command-palette-empty-text">No results found</p>
-      </div>
-
+    <!-- Search Mode -->
+    <div id="search-mode" class="command-palette-mode max-w-full">
+      <div id="pagefind-container" class="max-w-full"></div>
     </div>
 
     <!-- Footer -->
@@ -132,7 +128,68 @@ const collectionConfig = {
   </div>
 </div>
 
+<style is:global>
+  :root {
+    --pagefind-ui-scale: 0.8;
+    --pagefind-ui-primary: var(--color-content-muted);
+    --pagefind-ui-text: var(--color-content-primary);
+    --pagefind-ui-background: var(--color-surface-primary);
+    --pagefind-ui-border: var(--color-ui-primary);
+    --pagefind-ui-tag: var(--color-surface-suble);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 10px;
+    --pagefind-ui-image-border-radius: 10px;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: var(--font-sans);
+  }
+
+  #pagefind-container p {
+    font-weight: normal;
+  }
+
+  /* Pagefind Container */
+  #pagefind-container {
+    padding: 16px;
+  }
+
+  /* Override Pagefind UI styles to match theme */
+  #pagefind-container .pagefind-ui__search-input {
+    /* background: var(--color-surface-primary); */
+    /* border: 1px solid var(--color-ui-primary); */
+    /* color: var(--color-content-primary); */
+    /* border-radius: 10px; */
+    font-size: 14px;
+  }
+
+  #pagefind-container .pagefind-ui__result-inner mark {
+    /* background-color: var(--color-accent) !important; */
+    /* color: var(--color-surface-raised) !important; */
+    font-weight: 600 !important;
+    padding: 4px !important;
+    border-radius: 6px !important;
+  }
+
+  #pagefind-container .pagefind-ui__result {
+    /* border: 1px solid var(--color-ui-primary); */
+    /* border-radius: 6px; */
+    /* padding: 12px; */
+    /* margin-bottom: 8px; */
+    /* background: var(--color-surface-primary); */
+  }
+
+  #pagefind-container .pagefind-ui__result-title {
+    /* color: var(--color-content-primary); */
+    font-weight: 600;
+  }
+
+  #pagefind-container .pagefind-ui__result-excerpt {
+    color: var(--color-content-muted);
+  }
+
+</style>
+
 <style>
+
   .command-palette-backdrop {
     position: fixed;
     inset: 0;
@@ -156,68 +213,87 @@ const collectionConfig = {
     background: var(--color-surface-primary);
     border: 1px solid var(--color-ui-primary);
     width: min(95%, 640px);
+    max-height: 80vh;
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transform: scale(0.95);
     transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
   }
 
   .command-palette-backdrop.open .command-palette-modal {
     transform: scale(1);
   }
 
-  /* Input */
-  .command-palette-input-wrapper {
+  /* Tabs */
+  .command-palette-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-ui-primary);
+    background: var(--color-surface-subtle);
+  }
+
+  .command-palette-tab {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-bottom: 1px solid var(--color-ui-primary);
-  }
-
-  .command-palette-search-icon {
-    width: 20px;
-    height: 20px;
-    color: var(--color-content-muted);
-    flex-shrink: 0;
-  }
-
-  .command-palette-input {
-    flex: 1;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
     background: transparent;
-    border: none;
-    outline: none;
-    font-size: 16px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--color-content-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .command-palette-tab:hover {
+    background: var(--color-surface-primary);
     color: var(--color-content-primary);
   }
 
-  .command-palette-input::placeholder {
-    color: var(--color-content-muted);
+  .command-palette-tab.active {
+    background: var(--color-surface-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
-  .command-palette-hint {
-    padding: 4px 8px;
-    background: var(--color-surface-subtle);
-    border: 1px solid var(--color-ui-primary);
-    border-radius: 4px;
-    font-size: 12px;
+  .command-palette-close {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
     color: var(--color-content-muted);
-    font-family: monospace;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
 
-  /* Results */
-  .command-palette-results {
-    max-height: 400px;
+  .command-palette-close:hover {
+    background: var(--color-surface-primary);
+    color: var(--color-content-primary);
+  }
+
+  /* Modes */
+  .command-palette-mode {
+    display: none;
     overflow-y: auto;
-  }
-
-  .command-palette-section {
+    max-height: 500px;
     padding: 8px;
   }
 
-  .command-palette-section.hidden {
-    display: none;
+  .command-palette-mode.active {
+    display: block;
+  }
+
+  /* Sections */
+  .command-palette-section {
+    padding: 8px;
   }
 
   .command-palette-section-title {
@@ -264,51 +340,10 @@ const collectionConfig = {
     font-size: 14px;
   }
 
-  .command-palette-item-description {
-    font-size: 13px;
-    color: var(--color-content-muted);
-    margin-top: 2px;
-  }
-
-  .command-palette-item-badge {
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 4px;
-    color: white;
-  }
-
   .command-palette-item-external {
     width: 14px;
     height: 14px;
     color: var(--color-content-muted);
-  }
-
-  /* Search Result Specific */
-  .command-palette-search-result {
-    display: block;
-  }
-
-  /* Empty State */
-  .command-palette-empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--color-content-muted);
-  }
-
-  .command-palette-empty.hidden {
-    display: none;
-  }
-
-  .command-palette-empty-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    opacity: 0.3;
-  }
-
-  .command-palette-empty-text {
-    font-size: 14px;
   }
 
   /* Footer */
@@ -338,37 +373,27 @@ const collectionConfig = {
   }
 </style>
 
-<script>
-  interface CommandPaletteState {
-    isOpen: boolean;
-    mode: 'command' | 'search';
-    selectedIndex: number;
-    items: HTMLElement[];
-  }
+<!-- Pagefind UI Script -->
+<script src="/pagefind/pagefind-ui.js" is:inline></script>
 
+<script>
   class CommandPalette {
     private backdrop: HTMLElement;
-    private input: HTMLInputElement;
-    private resultsContainer: HTMLElement;
-    private searchResultsSection: HTMLElement;
-    private searchResultsList: HTMLElement;
-    private noResults: HTMLElement;
-    private state: CommandPaletteState;
+    private commandsMode: HTMLElement;
+    private searchMode: HTMLElement;
+    private tabCommands: HTMLElement;
+    private tabSearch: HTMLElement;
+    private closeBtn: HTMLElement;
+    private currentMode: 'command' | 'search' = 'command';
+    private pagefindUI: any = null;
 
     constructor() {
       this.backdrop = document.getElementById('command-palette-backdrop')!;
-      this.input = document.getElementById('command-palette-input') as HTMLInputElement;
-      this.resultsContainer = document.getElementById('command-palette-results')!;
-      this.searchResultsSection = this.resultsContainer.querySelector('[data-section="search-results"]')!;
-      this.searchResultsList = document.getElementById('search-results-list')!;
-      this.noResults = document.getElementById('no-results')!;
-
-      this.state = {
-        isOpen: false,
-        mode: 'command',
-        selectedIndex: 0,
-        items: [],
-      };
+      this.commandsMode = document.getElementById('commands-mode')!;
+      this.searchMode = document.getElementById('search-mode')!;
+      this.tabCommands = document.getElementById('tab-commands')!;
+      this.tabSearch = document.getElementById('tab-search')!;
+      this.closeBtn = document.getElementById('close-palette')!;
 
       this.init();
     }
@@ -382,41 +407,21 @@ const collectionConfig = {
       document.addEventListener('keydown', (e) => {
         const isTypingContext = ['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName);
 
-        // "/" → Open command palette
+        // "/" → Open command mode
         if (e.key === '/' && !e.metaKey && !e.ctrlKey && !isTypingContext) {
           e.preventDefault();
           this.open('command');
         }
 
-        // Ctrl/Cmd + K → Open search
+        // Ctrl/Cmd + K → Open search mode
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           this.open('search');
         }
 
         // ESC → Close
-        if (e.key === 'Escape' && this.state.isOpen) {
+        if (e.key === 'Escape' && this.backdrop.classList.contains('open')) {
           this.close();
-        }
-
-        // Arrow navigation when open
-        if (this.state.isOpen) {
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            this.selectNext();
-          } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            this.selectPrevious();
-          } else if (e.key === 'Enter') {
-            e.preventDefault();
-            // Don't execute if in search mode with query but no results yet
-            if (this.state.mode === 'search' && this.input.value.trim()) {
-              // Search mode - don't execute theme toggle
-              // Wait for search results to be implemented
-              return;
-            }
-            this.executeSelected();
-          }
         }
       });
     }
@@ -429,83 +434,78 @@ const collectionConfig = {
         }
       });
 
-      // Item click
-      this.resultsContainer.addEventListener('click', (e) => {
+      // Close button
+      this.closeBtn.addEventListener('click', () => {
+        this.close();
+      });
+
+      // Tab switching
+      this.tabCommands.addEventListener('click', () => {
+        this.switchMode('command');
+      });
+
+      this.tabSearch.addEventListener('click', () => {
+        this.switchMode('search');
+      });
+
+      // Command items click
+      this.commandsMode.addEventListener('click', (e) => {
         const item = (e.target as HTMLElement).closest('.command-palette-item') as HTMLElement;
         if (item) {
           this.executeItem(item);
         }
       });
-
-      // Search input
-      this.input.addEventListener('input', () => {
-        this.handleSearch(this.input.value);
-      });
     }
 
     private open(mode: 'command' | 'search') {
-      this.state.isOpen = true;
-      this.state.mode = mode;
       this.backdrop.classList.add('open');
-      this.input.value = '';
-      this.input.placeholder = mode === 'search' 
-        ? 'Search posts, docs, projects...' 
-        : 'Type to search or select a command...';
-      
-      // Show/hide sections based on mode
-      if (mode === 'search') {
-        this.hideNonSearchSections();
-      } else {
-        this.showAllSections();
-      }
+      this.switchMode(mode);
 
-      this.updateItems();
-      this.updateThemeActionIcon(); // Update theme icon based on current theme
-      this.selectIndex(0);
-      
-      setTimeout(() => this.input.focus(), 100);
+      // Initialize Pagefind UI on first search mode open
+      if (mode === 'search' && !this.pagefindUI) {
+        this.initPagefind();
+      }
     }
 
     private close() {
-      this.state.isOpen = false;
       this.backdrop.classList.remove('open');
-      this.input.value = '';
-      this.clearSearchResults();
     }
 
-    private updateItems() {
-      this.state.items = Array.from(
-        this.resultsContainer.querySelectorAll('.command-palette-item:not(.hidden)')
-      );
-    }
+    private switchMode(mode: 'command' | 'search') {
+      this.currentMode = mode;
 
-    private selectIndex(index: number) {
-      // Remove previous selection
-      this.state.items.forEach(item => item.classList.remove('selected'));
+      // Update tabs
+      if (mode === 'command') {
+        this.tabCommands.classList.add('active');
+        this.tabSearch.classList.remove('active');
+        this.commandsMode.classList.add('active');
+        this.searchMode.classList.remove('active');
+      } else {
+        this.tabSearch.classList.add('active');
+        this.tabCommands.classList.remove('active');
+        this.searchMode.classList.add('active');
+        this.commandsMode.classList.remove('active');
 
-      // Clamp index
-      this.state.selectedIndex = Math.max(0, Math.min(index, this.state.items.length - 1));
-
-      // Add selection
-      const selectedItem = this.state.items[this.state.selectedIndex];
-      if (selectedItem) {
-        selectedItem.classList.add('selected');
-        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // Initialize Pagefind if not already
+        if (!this.pagefindUI) {
+          this.initPagefind();
+        }
       }
     }
 
-    private selectNext() {
-      this.selectIndex(this.state.selectedIndex + 1);
-    }
-
-    private selectPrevious() {
-      this.selectIndex(this.state.selectedIndex - 1);
-    }
-
-    private executeSelected() {
-      const selectedItem = this.state.items[this.state.selectedIndex];
-      if (selectedItem) {
-        this.executeItem(selectedItem);
+    private initPagefind() {
+      if (typeof window.PagefindUI !== 'undefined') {
+        this.pagefindUI = new window.PagefindUI({ 
+          element: "#pagefind-container",
+          showSubResults: true,
+          showImages: false,
+          resetStyles: false,
+          autofocus: true,
+          showEmptyFilters: true
+        });
+        console.log('[CommandPalette] Pagefind UI initialized');
+      } else {
+        console.error('[CommandPalette] PagefindUI not loaded');
       }
     }
 
@@ -525,7 +525,7 @@ const collectionConfig = {
     private handleAction(action: string) {
       switch (action) {
         case 'theme':
-          // Use same logic as ThemeToggle.astro
+          // Toggle theme using data-theme
           const html = document.documentElement;
           const pageDarkTheme = html.getAttribute('data-dark-theme') || 'dark';
           const pageLightTheme = html.getAttribute('data-light-theme') || 'light';
@@ -538,97 +538,11 @@ const collectionConfig = {
           this.close();
           break;
         case 'search':
-          this.open('search');
+          this.switchMode('search');
           break;
         default:
-          console.warn('Unknown action:', action);
+          console.warn('[CommandPalette] Unknown action:', action);
       }
-    }
-
-    private updateThemeActionIcon() {
-      const html = document.documentElement;
-      const pageDarkTheme = html.getAttribute('data-dark-theme') || 'dark';
-      const currentTheme = html.getAttribute('data-theme');
-      
-      const themeAction = this.resultsContainer.querySelector('[data-action="theme"]');
-      if (themeAction) {
-        const iconWrapper = themeAction.querySelector('.command-palette-item-icon');
-        const label = themeAction.querySelector('.command-palette-item-label');
-        
-        if (currentTheme === pageDarkTheme) {
-          // In dark mode, show sun icon (switch to light)
-          if (iconWrapper) {
-            iconWrapper.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-          }
-          if (label) label.textContent = 'Switch to light mode';
-        } else {
-          // In light mode, show moon icon (switch to dark)
-          if (iconWrapper) {
-            iconWrapper.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-          }
-          if (label) label.textContent = 'Switch to dark mode';
-        }
-      }
-    }
-
-    private handleSearch(query: string) {
-      if (!query.trim()) {
-        this.clearSearchResults();
-        this.showAllSections();
-        this.updateItems();
-        this.selectIndex(0);
-        return;
-      }
-
-      // Hide non-search sections
-      this.hideNonSearchSections();
-
-      // TODO: Integrate with Pagefind
-      // For now, show placeholder
-      this.showSearchPlaceholder(query);
-
-      this.updateItems();
-      this.selectIndex(0);
-    }
-
-    private showSearchPlaceholder(query: string) {
-      this.searchResultsSection.classList.remove('hidden');
-      this.searchResultsList.innerHTML = `
-        <li class="command-palette-item" data-type="search-result">
-          <div class="command-palette-item-label">
-            Searching for "${query}"...
-          </div>
-          <span class="command-palette-item-description">
-            Pagefind integration coming soon
-          </span>
-        </li>
-      `;
-      this.noResults.classList.add('hidden');
-    }
-
-    private clearSearchResults() {
-      this.searchResultsList.innerHTML = '';
-      this.searchResultsSection.classList.add('hidden');
-      this.noResults.classList.add('hidden');
-    }
-
-    private hideNonSearchSections() {
-      const sections = this.resultsContainer.querySelectorAll('[data-section]');
-      sections.forEach(section => {
-        if (section.getAttribute('data-section') !== 'search-results') {
-          section.classList.add('hidden');
-        }
-      });
-    }
-
-    private showAllSections() {
-      const sections = this.resultsContainer.querySelectorAll('[data-section]');
-      sections.forEach(section => {
-        if (section.getAttribute('data-section') !== 'search-results') {
-          section.classList.remove('hidden');
-        }
-      });
-      this.searchResultsSection.classList.add('hidden');
     }
   }
 

@@ -40,7 +40,7 @@ export function getPostsByYearSorted(posts: Post[]): [string, Post[]][] {
 /**
  * Get unique tags from posts
  */
-export function getUniqueTags(posts: Post[]): string[] {
+export function getUniquePostTags(posts: Post[]): string[] {
   return getUniqueTags(posts);
 }
 

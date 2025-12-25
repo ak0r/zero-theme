@@ -53,14 +53,14 @@ export function getGalleriesByTag(galleries: Gallery[], tag: string): Gallery[] 
 /**
  * Get all unique tags
  */
-export function getUniqueTags(galleries: Gallery[]): string[] {
+export function getUniqueGalleryTags(galleries: Gallery[]): string[] {
   return getUniqueTags(galleries);
 }
 
 /**
  * Get tag counts
  */
-export function getTagCounts(galleries: Gallery[]): Record<string, number> {
+export function getGalleryTagCounts(galleries: Gallery[]): Record<string, number> {
   return getTagCounts(galleries);
 }
 

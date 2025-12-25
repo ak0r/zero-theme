@@ -28,7 +28,7 @@ const seoData = generatePostSEO(post, Astro.url.href);
 const allPosts = await getAllPosts();
 
 // Process the post content
-const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const { Content, headings = [], remarkPluginFrontmatter } = await render(post);
 const readingTime = calculateReadingTime(post.body || '');
 
 // Process image path
@@ -62,7 +62,7 @@ const breadcrumbs = getPostBreadcrumbs(post.id, post.data.title);
     <!-- Back to previous -->
     <div class="animate">
       <!-- <BackToPrevious href="/posts">Back to Posts</BackToPrevious> -->
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6"/>
     </div>
 
     <div class="relative animate">
@@ -123,20 +123,24 @@ const breadcrumbs = getPostBreadcrumbs(post.id, post.data.title);
       )}
     </div>
 
-    <article class="animate md-content flex flex-col gap-y-10">
+    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
+      <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-meta="title[content]" content={post.data.title} />
+      <meta data-pagefind-meta="description[content]" content={post.data.description} />
+      <meta data-pagefind-sort="date[content]" content={post.data.date.toISOString()} />
+      
       <!-- Article content -->
       <div class="prose max-w-none" id="post-content">
         <Content />
       </div>
-
-      {siteConfig.postOptions.linkedMentions.enabled && (
-        <LinkedMentions currentSlug={post.id} />
-      )}
-
-      <!-- Post navigation -->
-      {siteConfig.postOptions.postNavigation && (prevPost || nextPost) && (
-        <ContentNavigation prevEntry={prevPost} nextEntry={nextPost} />
-      )}
     </article>
+    {siteConfig.postOptions.linkedMentions.enabled && (
+      <LinkedMentions currentSlug={post.id} />
+    )}
+
+    <!-- Post navigation -->
+    {siteConfig.postOptions.postNavigation && (prevPost || nextPost) && (
+      <ContentNavigation prevEntry={prevPost} nextEntry={nextPost} />
+    )}
   </ContainerWrapper>
 </BaseLayout>

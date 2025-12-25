@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import type { Docs } from '@/types';
 import { siteConfig } from '@/site.config';
 import { resolveImage } from '@/utils/images';
-import { isValidDate } from '@/utils/content';
+import { isValidDate } from '@/utils/commonFunctions';
 import { generateDocSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -23,7 +23,7 @@ export interface Props {
 }
 
 const { documentation } = Astro.props;
-const { title, description, lastModified, version, image, imageAlt, hideTOC, hideCoverImage, series, tags } = documentation.data;
+const { title, description, date, lastModified, version, image, imageAlt, hideTOC, hideCoverImage, series, tags } = documentation.data;
 
 // Generate SEO data
 const seoData = generateDocSEO(documentation, Astro.url.href);
@@ -75,7 +75,7 @@ const breadcrumbs = getDocBreadcrumbs(documentation.id, documentation.data.title
     <!-- Back to previous -->
     <div class="animate">
       <!-- <BackToPrevious href="/docs">Back to Notes</BackToPrevious> -->
-       <Breadcrumbs items={breadcrumbs} />
+       <Breadcrumbs items={breadcrumbs}  class="my-6" />
     </div>
 
     <div class="relative animate">
@@ -144,25 +144,30 @@ const breadcrumbs = getDocBreadcrumbs(documentation.id, documentation.data.title
       )}
     </div>
 
-    <article class="animate md-content flex flex-col gap-y-10">
+    <article data-pagefind-body class="animate md-content flex flex-col gap-y-10">
+
+      <meta data-pagefind-filter="collection[content]" content="posts" />
+      <meta data-pagefind-meta="title[content]" content={title} />
+      <meta data-pagefind-meta="description[content]" content={description} />
+      <meta data-pagefind-sort="date[content]" content={ lastModified?.toISOString() || date.toISOString() } />
+      
       <!-- Article content -->
       <div class="prose max-w-none" id="doc-content">
         <Content />
       </div>
-
-      {siteConfig.postOptions.linkedMentions.enabled && (
-        <LinkedMentions currentSlug={documentation.id} />
-      )}
-
-      <!-- Navigation: Series or Related -->
-      {isPartOfSeries && (seriesNav.prev || seriesNav.next) ? (
-        <ContentNavigation 
-          prevEntry={seriesNav.prev} 
-          nextEntry={seriesNav.next}
-        />
-      ) : (
-        <RelatedNotes relatedDocs={relatedDocs} />
-      )}
     </article>
+    {siteConfig.postOptions.linkedMentions.enabled && (
+      <LinkedMentions currentSlug={documentation.id} />
+    )}
+
+    <!-- Navigation: Series or Related -->
+    {isPartOfSeries && (seriesNav.prev || seriesNav.next) ? (
+      <ContentNavigation 
+        prevEntry={seriesNav.prev} 
+        nextEntry={seriesNav.next}
+      />
+    ) : (
+      <RelatedNotes relatedDocs={relatedDocs} />
+    )}
   </ContainerWrapper>
 </BaseLayout>

@@ -1,6 +1,6 @@
 ---
 import { siteConfig } from '@/site.config';
-import { getAllPosts, sortPostsByDate, getUniqueTags } from '@/utils/getPosts';
+import { getAllPosts, sortPostsByDate, getUniquePostTags } from '@/utils/getPosts';
 import { generateIndexSEO } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SEO from '@/components/common/SEO.astro';
@@ -31,7 +31,7 @@ export async function getStaticPaths() {
         currentPage: i,
         totalPages,
         totalPosts: sortedPosts.length,
-        allTags: getUniqueTags(sortedPosts)
+        allTags: getUniquePostTags(sortedPosts)
       }
     });
   }
@@ -70,7 +70,7 @@ const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
     <!-- <BackToPrevious href="/">Back to Home</BackToPrevious> -->
 
     <div class="animate">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={breadcrumbs} class="my-6" />
     </div>
 
     <!-- Page Title -->

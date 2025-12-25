@@ -67,6 +67,12 @@ export interface WikilinkMatch {
   slug: string;
 }
 
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
 // ============================================================================
 // PAGINATION
 // ============================================================================
