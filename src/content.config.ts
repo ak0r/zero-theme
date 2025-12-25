@@ -150,6 +150,7 @@ const galleryCollection = defineCollection({
     slug: z.string().optional(),
     description: z.string().nullable().optional().default('No description provided'),
     date: z.coerce.date().default(() => new Date()),
+    imageDir: z.string().optional().default('./attachments'),
     coverImage: z.string().nullable().optional(), // Cover image for gallery card
     tags: z.array(z.string()).nullable().optional().default([]),
     draft: z.boolean().optional().default(false),

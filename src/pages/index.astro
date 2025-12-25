@@ -19,7 +19,7 @@ const sortedPosts = sortPostsByDate(allPosts);
 const previewPosts = sortedPosts.slice(0, siteConfig.homeOptions.recentPosts.count)
 
 // Get featured posts
-const featuredPosts = getFeaturedPosts(allPosts);
+const featuredPosts = getFeaturedPosts(allPosts).slice(0, 1);
 
 const seoData = generateHomeSEO(Astro.url.href);
 ---
@@ -56,7 +56,7 @@ const seoData = generateHomeSEO(Astro.url.href);
     <!-- ============================================================ -->
     <!-- FEATURED POST -->
     <!-- ============================================================ -->
-    {featuredPosts && (
+    {featuredPosts.length > 0 && (
       <section class="animate mb-12">
         <div class="flex items-center mb-6">
           <h2 class="text-lg font-semibold">Featured Post</h2>
@@ -82,7 +82,7 @@ const seoData = generateHomeSEO(Astro.url.href);
           </LinkWrapper>
         </div>
         <div class="space-y-4">
-          <ContentDisplay entries={previewPosts} display="card" showImages class="mb-8" />
+          <ContentDisplay entries={previewPosts} display="grid" showImages class="mb-8" />
         </div>
       </section>
     )}

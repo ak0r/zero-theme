@@ -5,6 +5,9 @@ import Container from '@/components/layout/ContainerWrapper.astro';
 import SEO from '@/components/common/SEO.astro';
 import GalleryGrid from '@/components/gallery/GalleryGrid.astro';
 import GalleryFilter from '@/components/gallery/GalleryFilter.astro';
+import Breadcrumbs from '@/components/widgets/Breadcrumbs.astro';
+import { getBreadcrumbsFromPath } from '@/utils/breadcrumbs';
+
 
 // Load all galleries
 const allGalleries = await getAllGalleries();
@@ -24,12 +27,19 @@ const seoData = {
   description: 'Photo galleries and image collections.',
   canonical: Astro.url.href,
 };
+
+// Generate breadcrumbs for the page
+const breadcrumbs = getBreadcrumbsFromPath(Astro.url.pathname);
+
 ---
 
 <BaseLayout>
   <SEO data={seoData} slot="head" />
   
   <Container class="py-8">
+    <div class="animate">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
     
     <!-- Header -->
     <div class="animate mb-12">

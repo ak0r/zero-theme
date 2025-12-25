@@ -8,6 +8,7 @@ import {
   getEntriesByTag,
   getFeaturedEntries,
 } from '@/utils/entries';
+import { getImagesInDirectory, resolveImage, stripObsidianBrackets } from '@/utils/images';
 
 export type Gallery = CollectionEntry<'gallery'>;
 
@@ -71,9 +72,28 @@ export function getTagCounts(galleries: Gallery[]): Record<string, number> {
  * Get gallery images from attachments folder
  * Uses import.meta.glob for efficient scanning
  */
-export async function getGalleryImages(gallerySlug: string): Promise<GalleryImage[]> {
-  // Construct glob pattern for this gallery's attachments
-  const pattern = `/src/content/gallery/${gallerySlug}/attachments/*.{jpg,jpeg,png,webp,gif}`;
+
+export function extractGalleryDir(filePath: string | undefined): string {
+  if (!filePath) return '';
+  
+  // filePath format: "gallery/2024-12-vacation/index.md"
+  const parts = filePath.split('/');
+  // Return the directory name (second-to-last part)
+  return parts[parts.length - 2] || '';
+}
+
+
+export async function getGalleryImages(
+  galleryDir: string,
+  imageDir: string = './attachments'
+): Promise<GalleryImage[]> {
+  // Normalize imageDir
+  const normalizedDir = imageDir.replace(/^\.\//, '').replace(/\/$/, '');
+  
+  // Build search path
+  const searchPath = normalizedDir === '.' || normalizedDir === ''
+    ? `/src/content/gallery/${galleryDir}/`
+    : `/src/content/gallery/${galleryDir}/${normalizedDir}/`;
   
   // Get all images using import.meta.glob
   const images = import.meta.glob<{ default: ImageMetadata }>(
@@ -83,7 +103,6 @@ export async function getGalleryImages(gallerySlug: string): Promise<GalleryImag
   
   // Filter to only this gallery's images
   const galleryImages: GalleryImage[] = [];
-  const searchPath = `/src/content/gallery/${gallerySlug}/attachments/`;
   
   for (const [path, module] of Object.entries(images)) {
     if (path.startsWith(searchPath)) {
@@ -103,8 +122,11 @@ export async function getGalleryImages(gallerySlug: string): Promise<GalleryImag
 /**
  * Get image count for a gallery
  */
-export async function getGalleryImageCount(gallerySlug: string): Promise<number> {
-  const images = await getGalleryImages(gallerySlug);
+export async function getGalleryImageCount(
+  galleryDir: string,
+  imageDir: string = './attachments'
+): Promise<number> {
+  const images = await getGalleryImages(galleryDir, imageDir);
   return images.length;
 }
 
@@ -112,24 +134,36 @@ export async function getGalleryImageCount(gallerySlug: string): Promise<number>
  * Get cover image for gallery card
  */
 export async function getGalleryCoverImage(
-  gallery: Gallery
+  gallery: Gallery,
+  galleryDir?: string
 ): Promise<GalleryImage | null> {
-  const images = await getGalleryImages(gallery.id);
+  const dir = galleryDir || extractGalleryDir(gallery.filePath);
+  const imageDir = gallery.data.imageDir || './attachments';
   
-  if (images.length === 0) return null;
-  
-  // If coverImage specified in frontmatter, find it
+  // If coverImage specified, resolve it first
   if (gallery.data.coverImage) {
-    const coverImage = images.find(img => 
-      img.filename === gallery.data.coverImage
-    );
-    if (coverImage) return coverImage;
+    const resolved = resolveImage(gallery.data.coverImage);
+    
+    // If it's an Astro-optimized image, find it in the gallery images
+    if (resolved?.kind === 'astro') {
+      const images = await getGalleryImages(dir, imageDir);
+      
+      // Extract just the filename from the resolved path
+      const resolvedFilename = resolved.image.src.split('/').pop()?.split('?')[0] || '';
+      
+      const coverImage = images.find(img => 
+        img.filename.includes(resolvedFilename) || 
+        img.image.src === resolved.image.src
+      );
+      
+      if (coverImage) return coverImage;
+    }
   }
   
-  // Otherwise return first image
-  return images[0];
+  // Fallback: return first image
+  const images = await getGalleryImages(dir, imageDir);
+  return images[0] || null;
 }
-
 /**
  * Gallery statistics
  */

@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { Picture } from 'astro:assets';
-import { getGalleryCoverImage, getGalleryImageCount } from '@/utils/getGallery';
+import { getGalleryCoverImage, getGalleryImageCount, extractGalleryDir } from '@/utils/getGallery';
 
 type Gallery = CollectionEntry<'gallery'>;
 
@@ -12,9 +12,11 @@ interface Props {
 const { gallery } = Astro.props;
 const { title, description, tags } = gallery.data;
 
+const galleryDir = extractGalleryDir(gallery.filePath);
+
 // Get cover image and image count
-const coverImage = await getGalleryCoverImage(gallery);
-const imageCount = await getGalleryImageCount(gallery.id);
+const coverImage = await getGalleryCoverImage(gallery, galleryDir);
+const imageCount = await getGalleryImageCount(galleryDir, gallery.data.imageDir);
 ---
 
 <a 
@@ -23,7 +25,7 @@ const imageCount = await getGalleryImageCount(gallery.id);
 >
   <!-- Cover Image -->
   {coverImage ? (
-    <div class="aspect-[4/3] overflow-hidden bg-surface-subtle">
+    <div class="aspect-4/3 overflow-hidden bg-surface-subtle">
       <Picture
         src={coverImage.image}
         alt={title}
@@ -35,7 +37,7 @@ const imageCount = await getGalleryImageCount(gallery.id);
       />
     </div>
   ) : (
-    <div class="aspect-[4/3] bg-surface-subtle flex items-center justify-center">
+    <div class="aspect-4/3 bg-surface-subtle flex items-center justify-center">
       <svg class="w-16 h-16 text-content-muted opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>

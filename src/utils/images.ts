@@ -52,3 +52,22 @@ export function resolveImage(raw: string | undefined): ResolvedImage | null {
   // Fallback: treat any other vault path as static under same path
   return { kind: "static", url: `/${vaultPath}` };
 }
+
+// NEW: Get all images from a specific directory
+export function getImagesInDirectory(dirPath: string): ImageMetadata[] {
+  const searchPath = `/src/content/${dirPath}`;
+  const images: ImageMetadata[] = [];
+  
+  for (const [path, module] of Object.entries(contentImages)) {
+    if (path.startsWith(searchPath)) {
+      images.push(module as ImageMetadata);
+    }
+  }
+  
+  return images;
+}
+
+// NEW: Get cover image using resolveImage
+export function resolveCoverImage(imagePath: string | undefined): ResolvedImage | null {
+  return resolveImage(imagePath);
+}

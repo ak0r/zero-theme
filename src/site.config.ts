@@ -72,7 +72,7 @@ export const siteConfig: SiteConfig = {
   },
 
   postOptions: {
-    postsPerPage: 3,
+    postsPerPage: 6,
     groupPostsByYear: true,
     readingTime: true,
     wordCount: true,
@@ -132,7 +132,7 @@ export const siteConfig: SiteConfig = {
     },
     recentPosts: {
       enabled: true,
-      count: 3
+      count: 4
     },
     projects: {
       enabled: false,
