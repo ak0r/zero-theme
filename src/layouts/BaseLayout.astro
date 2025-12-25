@@ -13,6 +13,7 @@ import ThemeManager from '@/components/common/ThemeManager.astro';
 import ScrollScript from '@/components/scripts/ScrollScript.astro';
 import AnimationScript from '@/components/scripts/AnimationScript.astro';
 import CollapsibleCalloutsScript from '@/components/scripts/CollapsibleCalloutsScript.astro';
+import CommandPalette from '@/components/widgets/CommandPalette.astro';
 
 export interface Props {
   bodyClass?: string;
@@ -87,7 +88,8 @@ const themeHash = generateThemeHash(siteConfig.featureButton, defaultTheme, ligh
     <!-- Widgets -->
     {siteConfig.scrollToTop && <ScrollToTop />}
     <ImageGalleryManager />
-
+     {siteConfig.commandPaletteConfig.enabled && <CommandPalette />}
+     
     <!-- Scripts -->
     <ScrollScript />
     <AnimationScript />

@@ -1,0 +1,644 @@
+---
+import { siteConfig } from '@/site.config';
+import Icon from '@/components/common/IconWrapper.astro';
+
+const config = siteConfig.commandPaletteConfig;
+
+// Build command items
+const quickActions = config.quickActions.enabled ? config.quickActions.actions : [];
+const navigationLinks = config.navigation.enabled ? config.navigation.links : [];
+const socialLinks = config.social.enabled ? siteConfig.navigation.social : [];
+
+// Collection badges configuration
+const collectionConfig = {
+  posts: { label: 'Post', color: 'bg-blue-500' },
+  docs: { label: 'Doc', color: 'bg-green-500' },
+  projects: { label: 'Project', color: 'bg-purple-500' },
+  pages: { label: 'Page', color: 'bg-orange-500' },
+};
+---
+
+<div id="command-palette-backdrop" class="command-palette-backdrop">
+  <div class="command-palette-modal">
+    
+    <!-- Search Input -->
+    <div class="command-palette-input-wrapper">
+      <Icon name="search" class="command-palette-search-icon" />
+      <input
+        id="command-palette-input"
+        class="command-palette-input"
+        type="text"
+        placeholder={config.search.placeholder}
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="command-palette-hint">ESC</kbd>
+    </div>
+
+    <!-- Results List -->
+    <div id="command-palette-results" class="command-palette-results">
+      
+      <!-- Quick Actions Section -->
+      {quickActions.length > 0 && (
+        <div class="command-palette-section" data-section="quick-actions">
+          <div class="command-palette-section-title">Quick Actions</div>
+          <ul class="command-palette-list">
+            {quickActions.map((action) => (
+              <li
+                class="command-palette-item"
+                data-type="action"
+                data-action={action.id}
+              >
+                <Icon name={action.icon} class="command-palette-item-icon" />
+                <span class="command-palette-item-label">{action.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <!-- Navigation Section -->
+      {navigationLinks.length > 0 && (
+        <div class="command-palette-section" data-section="navigation">
+          <div class="command-palette-section-title">Navigation</div>
+          <ul class="command-palette-list">
+            {navigationLinks.map((link) => (
+              <li
+                class="command-palette-item"
+                data-type="navigation"
+                data-href={link.url}
+              >
+                {link.icon && <Icon name={link.icon} class="command-palette-item-icon" />}
+                <span class="command-palette-item-label">{link.title}</span>
+                {link.external && <Icon name="external-link" class="command-palette-item-external" />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <!-- Social Links Section -->
+      {socialLinks.length > 0 && (
+        <div class="command-palette-section" data-section="social">
+          <div class="command-palette-section-title">Social</div>
+          <ul class="command-palette-list">
+            {socialLinks.map((social) => (
+              <li
+                class="command-palette-item"
+                data-type="social"
+                data-href={social.url}
+              >
+                <Icon name={social.icon} class="command-palette-item-icon" />
+                <span class="command-palette-item-label">{social.title}</span>
+                <Icon name="external-link" class="command-palette-item-external" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <!-- Search Results Section (populated by JS) -->
+      <div class="command-palette-section hidden" data-section="search-results">
+        <div class="command-palette-section-title">Search Results</div>
+        <ul id="search-results-list" class="command-palette-list">
+          <!-- Populated dynamically -->
+        </ul>
+      </div>
+
+      <!-- No Results Message -->
+      <div id="no-results" class="command-palette-empty hidden">
+        <Icon name="search" class="command-palette-empty-icon" />
+        <p class="command-palette-empty-text">No results found</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="command-palette-footer">
+      <div class="command-palette-footer-group">
+        <kbd>↑↓</kbd>
+        <span>Navigate</span>
+      </div>
+      <div class="command-palette-footer-group">
+        <kbd>↵</kbd>
+        <span>Select</span>
+      </div>
+      <div class="command-palette-footer-group">
+        <kbd>ESC</kbd>
+        <span>Close</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .command-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10vh;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .command-palette-backdrop.open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .command-palette-modal {
+    background: var(--color-surface-primary);
+    border: 1px solid var(--color-ui-primary);
+    width: min(95%, 640px);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+  }
+
+  .command-palette-backdrop.open .command-palette-modal {
+    transform: scale(1);
+  }
+
+  /* Input */
+  .command-palette-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-ui-primary);
+  }
+
+  .command-palette-search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-content-muted);
+    flex-shrink: 0;
+  }
+
+  .command-palette-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: var(--color-content-primary);
+  }
+
+  .command-palette-input::placeholder {
+    color: var(--color-content-muted);
+  }
+
+  .command-palette-hint {
+    padding: 4px 8px;
+    background: var(--color-surface-subtle);
+    border: 1px solid var(--color-ui-primary);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--color-content-muted);
+    font-family: monospace;
+  }
+
+  /* Results */
+  .command-palette-results {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .command-palette-section {
+    padding: 8px;
+  }
+
+  .command-palette-section.hidden {
+    display: none;
+  }
+
+  .command-palette-section-title {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-content-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .command-palette-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Items */
+  .command-palette-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--color-content-primary);
+    transition: background 0.15s ease;
+  }
+
+  .command-palette-item:hover,
+  .command-palette-item.selected {
+    background: var(--color-surface-subtle);
+  }
+
+  .command-palette-item-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-content-muted);
+    flex-shrink: 0;
+  }
+
+  .command-palette-item-label {
+    flex: 1;
+    font-size: 14px;
+  }
+
+  .command-palette-item-description {
+    font-size: 13px;
+    color: var(--color-content-muted);
+    margin-top: 2px;
+  }
+
+  .command-palette-item-badge {
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    color: white;
+  }
+
+  .command-palette-item-external {
+    width: 14px;
+    height: 14px;
+    color: var(--color-content-muted);
+  }
+
+  /* Search Result Specific */
+  .command-palette-search-result {
+    display: block;
+  }
+
+  /* Empty State */
+  .command-palette-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--color-content-muted);
+  }
+
+  .command-palette-empty.hidden {
+    display: none;
+  }
+
+  .command-palette-empty-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    opacity: 0.3;
+  }
+
+  .command-palette-empty-text {
+    font-size: 14px;
+  }
+
+  /* Footer */
+  .command-palette-footer {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-ui-primary);
+    background: var(--color-surface-subtle);
+  }
+
+  .command-palette-footer-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-content-muted);
+  }
+
+  .command-palette-footer kbd {
+    padding: 2px 6px;
+    background: var(--color-surface-primary);
+    border: 1px solid var(--color-ui-primary);
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+</style>
+
+<script>
+  interface CommandPaletteState {
+    isOpen: boolean;
+    mode: 'command' | 'search';
+    selectedIndex: number;
+    items: HTMLElement[];
+  }
+
+  class CommandPalette {
+    private backdrop: HTMLElement;
+    private input: HTMLInputElement;
+    private resultsContainer: HTMLElement;
+    private searchResultsSection: HTMLElement;
+    private searchResultsList: HTMLElement;
+    private noResults: HTMLElement;
+    private state: CommandPaletteState;
+
+    constructor() {
+      this.backdrop = document.getElementById('command-palette-backdrop')!;
+      this.input = document.getElementById('command-palette-input') as HTMLInputElement;
+      this.resultsContainer = document.getElementById('command-palette-results')!;
+      this.searchResultsSection = this.resultsContainer.querySelector('[data-section="search-results"]')!;
+      this.searchResultsList = document.getElementById('search-results-list')!;
+      this.noResults = document.getElementById('no-results')!;
+
+      this.state = {
+        isOpen: false,
+        mode: 'command',
+        selectedIndex: 0,
+        items: [],
+      };
+
+      this.init();
+    }
+
+    private init() {
+      this.setupKeyboardShortcuts();
+      this.setupEventListeners();
+    }
+
+    private setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        const isTypingContext = ['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName);
+
+        // "/" → Open command palette
+        if (e.key === '/' && !e.metaKey && !e.ctrlKey && !isTypingContext) {
+          e.preventDefault();
+          this.open('command');
+        }
+
+        // Ctrl/Cmd + K → Open search
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          this.open('search');
+        }
+
+        // ESC → Close
+        if (e.key === 'Escape' && this.state.isOpen) {
+          this.close();
+        }
+
+        // Arrow navigation when open
+        if (this.state.isOpen) {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.selectNext();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.selectPrevious();
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            // Don't execute if in search mode with query but no results yet
+            if (this.state.mode === 'search' && this.input.value.trim()) {
+              // Search mode - don't execute theme toggle
+              // Wait for search results to be implemented
+              return;
+            }
+            this.executeSelected();
+          }
+        }
+      });
+    }
+
+    private setupEventListeners() {
+      // Close on backdrop click
+      this.backdrop.addEventListener('click', (e) => {
+        if (e.target === this.backdrop) {
+          this.close();
+        }
+      });
+
+      // Item click
+      this.resultsContainer.addEventListener('click', (e) => {
+        const item = (e.target as HTMLElement).closest('.command-palette-item') as HTMLElement;
+        if (item) {
+          this.executeItem(item);
+        }
+      });
+
+      // Search input
+      this.input.addEventListener('input', () => {
+        this.handleSearch(this.input.value);
+      });
+    }
+
+    private open(mode: 'command' | 'search') {
+      this.state.isOpen = true;
+      this.state.mode = mode;
+      this.backdrop.classList.add('open');
+      this.input.value = '';
+      this.input.placeholder = mode === 'search' 
+        ? 'Search posts, docs, projects...' 
+        : 'Type to search or select a command...';
+      
+      // Show/hide sections based on mode
+      if (mode === 'search') {
+        this.hideNonSearchSections();
+      } else {
+        this.showAllSections();
+      }
+
+      this.updateItems();
+      this.updateThemeActionIcon(); // Update theme icon based on current theme
+      this.selectIndex(0);
+      
+      setTimeout(() => this.input.focus(), 100);
+    }
+
+    private close() {
+      this.state.isOpen = false;
+      this.backdrop.classList.remove('open');
+      this.input.value = '';
+      this.clearSearchResults();
+    }
+
+    private updateItems() {
+      this.state.items = Array.from(
+        this.resultsContainer.querySelectorAll('.command-palette-item:not(.hidden)')
+      );
+    }
+
+    private selectIndex(index: number) {
+      // Remove previous selection
+      this.state.items.forEach(item => item.classList.remove('selected'));
+
+      // Clamp index
+      this.state.selectedIndex = Math.max(0, Math.min(index, this.state.items.length - 1));
+
+      // Add selection
+      const selectedItem = this.state.items[this.state.selectedIndex];
+      if (selectedItem) {
+        selectedItem.classList.add('selected');
+        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    private selectNext() {
+      this.selectIndex(this.state.selectedIndex + 1);
+    }
+
+    private selectPrevious() {
+      this.selectIndex(this.state.selectedIndex - 1);
+    }
+
+    private executeSelected() {
+      const selectedItem = this.state.items[this.state.selectedIndex];
+      if (selectedItem) {
+        this.executeItem(selectedItem);
+      }
+    }
+
+    private executeItem(item: HTMLElement) {
+      const type = item.dataset.type;
+      const action = item.dataset.action;
+      const href = item.dataset.href;
+
+      if (type === 'action') {
+        this.handleAction(action!);
+      } else if (href) {
+        window.location.href = href;
+        this.close();
+      }
+    }
+
+    private handleAction(action: string) {
+      switch (action) {
+        case 'theme':
+          // Use same logic as ThemeToggle.astro
+          const html = document.documentElement;
+          const pageDarkTheme = html.getAttribute('data-dark-theme') || 'dark';
+          const pageLightTheme = html.getAttribute('data-light-theme') || 'light';
+          const currentTheme = html.getAttribute('data-theme');
+          const newTheme = currentTheme === pageDarkTheme ? pageLightTheme : pageDarkTheme;
+          
+          html.setAttribute('data-theme', newTheme);
+          localStorage.setItem('data-theme', newTheme);
+          
+          this.close();
+          break;
+        case 'search':
+          this.open('search');
+          break;
+        default:
+          console.warn('Unknown action:', action);
+      }
+    }
+
+    private updateThemeActionIcon() {
+      const html = document.documentElement;
+      const pageDarkTheme = html.getAttribute('data-dark-theme') || 'dark';
+      const currentTheme = html.getAttribute('data-theme');
+      
+      const themeAction = this.resultsContainer.querySelector('[data-action="theme"]');
+      if (themeAction) {
+        const iconWrapper = themeAction.querySelector('.command-palette-item-icon');
+        const label = themeAction.querySelector('.command-palette-item-label');
+        
+        if (currentTheme === pageDarkTheme) {
+          // In dark mode, show sun icon (switch to light)
+          if (iconWrapper) {
+            iconWrapper.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+          }
+          if (label) label.textContent = 'Switch to light mode';
+        } else {
+          // In light mode, show moon icon (switch to dark)
+          if (iconWrapper) {
+            iconWrapper.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+          }
+          if (label) label.textContent = 'Switch to dark mode';
+        }
+      }
+    }
+
+    private handleSearch(query: string) {
+      if (!query.trim()) {
+        this.clearSearchResults();
+        this.showAllSections();
+        this.updateItems();
+        this.selectIndex(0);
+        return;
+      }
+
+      // Hide non-search sections
+      this.hideNonSearchSections();
+
+      // TODO: Integrate with Pagefind
+      // For now, show placeholder
+      this.showSearchPlaceholder(query);
+
+      this.updateItems();
+      this.selectIndex(0);
+    }
+
+    private showSearchPlaceholder(query: string) {
+      this.searchResultsSection.classList.remove('hidden');
+      this.searchResultsList.innerHTML = `
+        <li class="command-palette-item" data-type="search-result">
+          <div class="command-palette-item-label">
+            Searching for "${query}"...
+          </div>
+          <span class="command-palette-item-description">
+            Pagefind integration coming soon
+          </span>
+        </li>
+      `;
+      this.noResults.classList.add('hidden');
+    }
+
+    private clearSearchResults() {
+      this.searchResultsList.innerHTML = '';
+      this.searchResultsSection.classList.add('hidden');
+      this.noResults.classList.add('hidden');
+    }
+
+    private hideNonSearchSections() {
+      const sections = this.resultsContainer.querySelectorAll('[data-section]');
+      sections.forEach(section => {
+        if (section.getAttribute('data-section') !== 'search-results') {
+          section.classList.add('hidden');
+        }
+      });
+    }
+
+    private showAllSections() {
+      const sections = this.resultsContainer.querySelectorAll('[data-section]');
+      sections.forEach(section => {
+        if (section.getAttribute('data-section') !== 'search-results') {
+          section.classList.remove('hidden');
+        }
+      });
+      this.searchResultsSection.classList.add('hidden');
+    }
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => new CommandPalette());
+  } else {
+    new CommandPalette();
+  }
+
+  // Reinitialize on view transitions
+  document.addEventListener('astro:page-load', () => new CommandPalette());
+</script>

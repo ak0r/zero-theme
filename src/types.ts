@@ -1,6 +1,10 @@
 import type { CollectionEntry } from "astro:content";
 import type { ImageMetadata } from "astro";
 
+// ============================================================================
+// COLLECTION TYPES
+// ============================================================================
+
 export type Post = CollectionEntry<"posts">;
 export type PostData = CollectionEntry<"posts">["data"];
 export type Page = CollectionEntry<"pages">;
@@ -10,20 +14,33 @@ export type ProjectData = CollectionEntry<"projects">["data"];
 export type Docs = CollectionEntry<"docs">;
 export type DocsData = CollectionEntry<"docs">["data"];
 
-// Aspect ratio options for post cards
-export type AspectRatio = 
-  | "16:9" 
-  | "4:3"
-  | "3:2"
-  | "og"
-  | "square"
-  | "golden"
-  | "custom";
+// ============================================================================
+// IMAGE TYPES
+// ============================================================================
 
 export type ResolvedImage =
   | { kind: 'astro'; image: ImageMetadata; source: 'post' | 'shared' }
   | { kind: 'static'; url: string; source?: 'attachments' }
   | { kind: 'remote'; url: string; source?: 'external' };
+
+export interface ImageInfo {
+  src: string;
+  alt: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface OpenGraphImage {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
+// ============================================================================
+// CONTENT TYPES
+// ============================================================================
 
 export interface Heading {
   depth: number;
@@ -38,35 +55,36 @@ export interface ReadingTime {
   words: number;
 }
 
-export interface NavigationItem {
+export interface LinkedMention {
   title: string;
-  url: string;
-  external?: boolean;
-  icon?: string;
+  slug: string;
+  excerpt: string;
 }
 
-export interface SocialLink {
-  title: string;
-  url: string;
-  icon: string;
+export interface WikilinkMatch {
+  link: string;
+  display: string;
+  slug: string;
 }
 
-export interface ImageInfo {
-  src: string;
-  alt: string;
-  caption?: string;
-  width?: number;
-  height?: number;
+// ============================================================================
+// PAGINATION
+// ============================================================================
+
+export interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  nextUrl?: string;
+  prevUrl?: string;
 }
+
+// ============================================================================
+// SEO
+// ============================================================================
 
 export type DateFormat = 'long' | 'short' | 'full' | 'monthDay';
-
-export interface OpenGraphImage {
-  url: string;
-  alt: string;
-  width: number;
-  height: number;
-}
 
 export interface SEOData {
   title: string;
@@ -89,44 +107,109 @@ export interface SEOData {
   keywords?: string[];
 }
 
-export interface LinkedMention {
+// ============================================================================
+// NAVIGATION & SOCIAL
+// ============================================================================
+
+export interface NavigationItem {
   title: string;
-  slug: string;
-  excerpt: string;
+  url: string;
+  external?: boolean;
+  icon?: string;
 }
 
-export interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  nextUrl?: string;
-  prevUrl?: string;
+export interface SocialLink {
+  title: string;
+  url: string;
+  icon: string;
 }
+
+// ============================================================================
+// COMMAND PALETTE
+// ============================================================================
+
+export interface QuickAction {
+  id: string;
+  label: string;
+  icon: string;
+  action?: string;
+}
+
+export interface CommandPaletteItem {
+  id: string;
+  type: 'action' | 'navigation' | 'social' | 'search-result';
+  label: string;
+  description?: string;
+  icon?: string;
+  href?: string;
+  badge?: string;
+  action?: () => void;
+}
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  excerpt: string;
+  url: string;
+  collection: 'posts' | 'docs' | 'projects' | 'pages' | 'gallery';
+}
+
+export interface CommandPaletteConfig {
+  enabled: boolean;
+  search: {
+    enabled: boolean;
+    placeholder: string;
+    collections: {
+      posts: boolean;
+      docs: boolean;
+      projects: boolean;
+      pages: boolean;
+      gallery: boolean;
+    };
+  };
+  quickActions: {
+    enabled: boolean;
+    actions: QuickAction[];
+  };
+  navigation: {
+    enabled: boolean;
+    links: NavigationItem[]; // Uses shared NavigationItem type
+  };
+  social: {
+    enabled: boolean;
+    // Note: Uses siteConfig.navigation.social (array of SocialLink)
+  };
+}
+
+// ============================================================================
+// SITE CONFIGURATION
+// ============================================================================
+
+export type AspectRatio = 
+  | "16:9" 
+  | "4:3"
+  | "3:2"
+  | "og"
+  | "square"
+  | "golden"
+  | "custom";
 
 export interface SiteConfig {
-  siteURL: string
-  title: string
-  description: string
-  author: string
-  language?: string
-  defaultOgImageAlt?: string
+  // Basic Info
+  siteURL: string;
+  title: string;
+  description: string;
+  author: string;
+  language?: string;
+  defaultOgImageAlt?: string;
   
-  // Global Settings
-  defaultTheme: "light"; // Default theme
-  // customThemeFile?: string; // Filename in src/themes/custom/ (e.g., "my-cool-theme" for my-cool-theme.ts) Not configured
+  // Theme & UI
+  defaultTheme: "light";
   availableThemes: ["light", "dark"];
-  featureButton: "mode" | "none"; // only mode configured
+  featureButton: "mode" | "none";
   scrollToTop: boolean;
-  tableOfContents: {
-    enabled: boolean;
-    depth: number;
-  };
-  footer: {
-    enabled: boolean;
-    content: string;
-    showSocialIconsInFooter: boolean;
-  };
+  
   // Profile Picture
   profilePicture: {
     enabled: boolean;
@@ -138,44 +221,40 @@ export interface SiteConfig {
     style: "circle" | "square" | "none";
   };
 
+  // Layout
+  layout: {
+    contentWidth: string;
+  };
+
   // Navigation
   navigation: {
     showNavigation: boolean;
     style: "minimal" | "traditional";
     showMobileMenu: boolean;
-    pages: Array<{ title: string; url: string }>;
-    social: Array<{ title: string; url: string; icon: string }>;
+    pages: NavigationItem[]; // Changed from Array<{ title: string; url: string }>
+    social: SocialLink[]; // Changed from Array<{ title: string; url: string; icon: string }>
   };
 
   // Command Palette
-  // commandPalette: {
-  //   enabled: boolean;
-  //   shortcut: string;
-  //   placeholder: string;
-  //   search: {
-  //     posts: boolean;
-  //     pages: boolean;
-  //     projects: boolean;
-  //     docs: boolean;
-  //   };
-  //   sections: {
-  //     quickActions: boolean;
-  //     pages: boolean;
-  //     social: boolean;
-  //   };
-  //   quickActions: {
-  //     enabled: boolean;
-  //     toggleMode: boolean;
-  //     graphView: boolean;
-  //     changeTheme: boolean;
-  //   };
-  // };
+  commandPaletteConfig: CommandPaletteConfig; // Fixed: Not an array!
+
+  // Table of Contents
+  tableOfContents: {
+    enabled: boolean;
+    depth: number;
+  };
+
+  // Footer
+  footer: {
+    enabled: boolean;
+    content: string;
+    showSocialIconsInFooter: boolean;
+  };
 
   // Home Options
   homeOptions: {
     featuredPost: {
       enabled: boolean;
-      // recent most post will be featured
     };
     recentPosts: {
       enabled: boolean;
@@ -192,10 +271,6 @@ export interface SiteConfig {
     blurb: {
       placement: "above" | "below" | "none";
     };
-  };
-
-  layout: {
-    contentWidth: string;
   };
 
   // Post Options
@@ -242,25 +317,4 @@ export interface SiteConfig {
     projects: boolean;
     docs: boolean;
   };
-}
-
-export interface WikilinkMatch {
-  link: string;
-  display: string;
-  slug: string;
-}
-
-export interface LinkedMention {
-  title: string;
-  slug: string;
-  excerpt: string;
-}
-
-export interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  nextUrl?: string;
-  prevUrl?: string;
 }

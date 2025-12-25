@@ -6,32 +6,10 @@ export const siteConfig: SiteConfig = {
   description: "Zero - A Minimalist AstroJS Theme for Obsidian Users",
   author: "Amit K",
   language: "en",
-  defaultTheme: "light", // not configured
-  // customThemeFile: "", // not configured
-  availableThemes: ["light", "dark"], // not configured
-  featureButton: "mode", // only mode configured
-  // commandPalette: {
-  //   enabled: false,
-  //   shortcut: "ctrl+K",
-  //   placeholder: "Search posts",
-  //   search: {
-  //     posts: true,
-  //     pages: false,
-  //     projects: false,
-  //     docs: false
-  //   },
-  //   sections: {
-  //     quickActions: true,
-  //     pages: true,
-  //     social: true
-  //   },
-  //   quickActions: {
-  //     enabled: true,
-  //     toggleMode: true,
-  //     graphView: false,
-  //     changeTheme: true
-  //   }
-  // },
+  defaultTheme: "light",
+  availableThemes: ["light", "dark"],
+  featureButton: "mode",
+
   profilePicture: {
     enabled: false,
     image: "",
@@ -71,42 +49,44 @@ export const siteConfig: SiteConfig = {
     ],
   },
 
-  postOptions: {
-    postsPerPage: 6,
-    groupPostsByYear: true,
-    readingTime: true,
-    wordCount: true,
-    tags: true,
-    linkedMentions: {
+  commandPaletteConfig: {
+    enabled: true,
+    
+    search: {
       enabled: true,
-      linkedMentionsCompact: false
+      placeholder: "Search posts, docs, projects...",
+      collections: {
+        posts: true,
+        docs: true,
+        projects: true,
+        pages: true,
+        gallery: false,
+      },
     },
-    graphView: {
-      enabled: false,
-      showInSidebar: false,
-      maxNodes: 100,
-      showOrphanedPosts: true
+    
+    quickActions: {
+      enabled: true,
+      actions: [
+        { id: "theme", label: "Toggle theme", icon: "sun" },
+        { id: "search", label: "Search content", icon: "search" },
+      ],
     },
-    postNavigation: true,
-    showPostCardCoverImages: "featured", // "all" | "featured" | "home" | "posts" | "featured-and-posts" | "none"
-    postCardAspectRatio: "og", // "16:9" | "4:3" | "3:2" | "og" | "square" | "golden" | "custom"
-    customPostCardAspectRatio: "2.5/1", // Only used when postCardAspectRatio is "custom" (e.g., "2.5/1")
-    comments: {
-      enabled: false,
-      provider: "",
-      repo: "",
-      repoId: "",
-      category: "",
-      categoryId: "",
-      mapping: "",
-      strict: "",
-      reactions: "",
-      metadata: "",
-      inputPosition: "",
-      theme: "",
-      lang: "",
-      loading: ""
-    }
+    
+    navigation: {
+      enabled: true,
+      links: [
+        { title: "Home", url: "/", icon: "home" },
+        { title: "Posts", url: "/posts", icon: "pencil" },
+        { title: "Projects", url: "/projects", icon: "briefcase" },
+        { title: "Docs", url: "/docs", icon: "book" },
+        { title: "Gallery", url: "/gallery", icon: "library-photo" },
+      ],
+    },
+    
+    social: {
+      enabled: true,
+      // Uses siteConfig.navigation.social array
+    },
   },
 
   tableOfContents: {
@@ -121,6 +101,7 @@ export const siteConfig: SiteConfig = {
   },
 
   scrollToTop: true,
+
   optionalContentTypes: {
     projects: false,
     docs: false
@@ -146,21 +127,68 @@ export const siteConfig: SiteConfig = {
       placement: "none"
     }
   },
-  
+
+  postOptions: {
+    postsPerPage: 6,
+    groupPostsByYear: true,
+    readingTime: true,
+    wordCount: true,
+    tags: true,
+    linkedMentions: {
+      enabled: true,
+      linkedMentionsCompact: false
+    },
+    graphView: {
+      enabled: false,
+      showInSidebar: false,
+      maxNodes: 100,
+      showOrphanedPosts: true
+    },
+    postNavigation: true,
+    showPostCardCoverImages: "featured",
+    postCardAspectRatio: "og",
+    customPostCardAspectRatio: "2.5/1",
+    comments: {
+      enabled: false,
+      provider: "",
+      repo: "",
+      repoId: "",
+      category: "",
+      categoryId: "",
+      mapping: "",
+      strict: "",
+      reactions: "",
+      metadata: "",
+      inputPosition: "",
+      theme: "",
+      lang: "",
+      loading: ""
+    }
+  },
 }
 
-// Utility functions
-export function getFeature(feature: keyof Omit<SiteConfig["postOptions"], "postsPerPage" | "showPostCardCoverImages" | "postCardAspectRatio" | "customPostCardAspectRatio" | "linkedMentions" | "graphView" | "comments">): boolean {
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+export function getFeature(
+  feature: keyof Omit<
+    SiteConfig["postOptions"], 
+    "postsPerPage" | 
+    "showPostCardCoverImages" | 
+    "postCardAspectRatio" | 
+    "customPostCardAspectRatio" | 
+    "linkedMentions" | 
+    "graphView" | 
+    "comments"
+  >
+): boolean {
   return siteConfig.postOptions[feature];
 }
 
 export function getContentWidth(): string {
   return siteConfig.layout.contentWidth;
 }
-
-// export function getTheme(): "flexoki-light" | "flexoki-dark" | "everforest-light" | "everforest-dark" | "nord-light" | "nord-dark" | "custom" {
-//   return siteConfig.theme;
-// }
 
 export function getPostCardAspectRatio(): string {
   const { postCardAspectRatio, customPostCardAspectRatio } = siteConfig.postOptions;
@@ -179,9 +207,9 @@ export function getPostCardAspectRatio(): string {
     case "golden":
       return "1.618 / 1";
     case "custom":
-      return customPostCardAspectRatio || "1.91 / 1"; // Fallback to OpenGraph if custom not provided
+      return customPostCardAspectRatio || "1.91 / 1";
     default:
-      return "1.91 / 1"; // Default to OpenGraph
+      return "1.91 / 1";
   }
 }
 
